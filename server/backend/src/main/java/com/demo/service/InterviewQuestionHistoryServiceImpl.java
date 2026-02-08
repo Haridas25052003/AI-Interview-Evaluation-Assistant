@@ -17,6 +17,19 @@ public class InterviewQuestionHistoryServiceImpl implements InterviewQuestionHis
 		
 		return iqd.save(question);
 	}
+
+	@Override
+	public InterviewQuestionHistory submitAnswer(int questionId, String userAnswer) {
+		InterviewQuestionHistory question =
+	            iqd.findById(questionId).orElse(null);
+
+	    if (question != null) {
+	        question.setUserAnswer(userAnswer);
+	        question.setAnsweredAt(java.time.LocalDateTime.now());
+	        return iqd.save(question);
+	    }
+		return null;
+	}
 	
 
 }
