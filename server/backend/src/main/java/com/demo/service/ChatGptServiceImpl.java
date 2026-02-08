@@ -62,4 +62,20 @@ public class ChatGptServiceImpl implements ChatGptService{
         return message.get("content").toString();
 		
 	}
+
+	@Override
+	public String evaluateAnswer(String prompt) {
+		
+		return """
+				{
+	  "relevance": 8,
+      "concept": 7,
+      "clarity": 8,
+      "grammar": 9,
+      "completeness": 7,
+      "overall": 7.8,
+      "feedback": "Good understanding, improve depth."
+				}
+				""";
+	}
 }
