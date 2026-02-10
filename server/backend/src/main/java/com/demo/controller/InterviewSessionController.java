@@ -27,4 +27,11 @@ public class InterviewSessionController {
 			@RequestParam double overallScore) {
 		return iss.endSession(sessionId, overallScore);
 	}
+	
+	@PostMapping("/finish")
+	public String finishSession(@RequestParam int sessionId) {
+	    iss.finishInterviewSession(sessionId);
+	    return "Interview session completed";
+	}
+
 }

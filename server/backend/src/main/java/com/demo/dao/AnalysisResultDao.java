@@ -1,5 +1,6 @@
 package com.demo.dao;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,5 +15,8 @@ public interface AnalysisResultDao extends JpaRepository<AnalysisResult,Integer>
 	//Optional<InterviewQuestionHistory> findByQuestionHistoryId(int questionHistoryId);
 	
 	 Optional<AnalysisResult> findByQuestionHistoryId(int questionHistoryId);
+	 
+	 List<AnalysisResult> findByQuestionHistory_InterviewSession_Id(int sessionId);
+
 
 }

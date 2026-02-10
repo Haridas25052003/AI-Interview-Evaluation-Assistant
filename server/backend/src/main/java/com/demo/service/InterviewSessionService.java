@@ -7,4 +7,7 @@ public interface InterviewSessionService {
 	InterviewSession startSession(InterviewSession session);
 	
 	InterviewSession endSession(int sessionId,double overallScore);
+	
+	public void finishInterviewSession(int sessionId);
+
 }
