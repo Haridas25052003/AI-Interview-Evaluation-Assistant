@@ -17,6 +17,9 @@ public interface AnalysisResultDao extends JpaRepository<AnalysisResult,Integer>
 	 Optional<AnalysisResult> findByQuestionHistoryId(int questionHistoryId);
 	 
 	 List<AnalysisResult> findByQuestionHistory_InterviewSession_Id(int sessionId);
+	 
+	// List<AnalysisResult> findByQuestionHistory_InterviewSession_Id(int sessionId);
+
 
 
 }
