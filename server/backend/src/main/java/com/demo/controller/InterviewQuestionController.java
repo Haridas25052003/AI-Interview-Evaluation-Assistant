@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.demo.model.InterviewQuestionHistory;
+import com.demo.model.InterviewQuestion;
 import com.demo.service.InterviewQuestionHistoryService;
 
 @RestController
@@ -18,15 +18,15 @@ public class InterviewQuestionController {
 	private InterviewQuestionHistoryService service;
 	
 	@PostMapping("/save")
-	public InterviewQuestionHistory saveQuestion(
-			@RequestBody InterviewQuestionHistory question) {
+	public InterviewQuestion saveQuestion(
+			@RequestBody InterviewQuestion question) {
 		
 		question.setAnsweredAt(LocalDateTime.now());
 		return service.saveQuestion(question);
 	}
 	
 	@PostMapping("/submit-answer")
-	public InterviewQuestionHistory submitAnswer(
+	public InterviewQuestion submitAnswer(
 	        @RequestParam int questionId,
 	        @RequestParam String answer) {
 
