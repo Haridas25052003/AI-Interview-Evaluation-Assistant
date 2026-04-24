@@ -1,12 +1,18 @@
 package com.demo.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import jakarta.persistence.*;
+import lombok.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import jakarta.persistence.*;
-
 @Entity
-@Table(name = "users")
+@Table(name = "users") // "user" is a reserved keyword in most DBs
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class User {
 
 	@Id
@@ -20,14 +26,22 @@ public class User {
 	private String email;
 
 	@Column(nullable = false)
-	private String password;
+	private String password; // always store BCrypt encoded, never plain text
 
-	private String role; // USER / ADMIN
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private Role role = Role.USER; // default role
 
-	private LocalDateTime createdAt = LocalDateTime.now();
+	@Column(nullable = false, updatable = false)
+	private LocalDateTime createdAt;
 
-	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+	@PrePersist
+	protected void onCreate() {
+		this.createdAt = LocalDateTime.now();
+	}
+
+	// one user can have multiple interview setups (HR, Technical etc.)
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@JsonManagedReference // prevents infinite recursion during JSON serialization
 	private List<InterviewSetup> interviewSetups;
-
-	// Getters & Setters
 }
