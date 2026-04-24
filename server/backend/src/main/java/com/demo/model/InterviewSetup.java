@@ -1,64 +1,56 @@
 package com.demo.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import jakarta.persistence.*;
+import lombok.*;
 import java.util.List;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-
 @Entity
+@Table(name = "interview_setup")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class InterviewSetup {
 
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	private int id;
-	
-	private String interviewLevel;
-	private String programmingLanguage;
-	@ManyToOne
-    @JoinColumn(name = "user_id")
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+
+	// HR or TECHNICAL
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private InterviewType interviewType;
+
+	// --- Fields below are only relevant for TECHNICAL interviews ---
+
+	// e.g. ["Java", "Spring Boot", "React"]
+	// stored as a separate table: interview_setup_tech_stack
+	@ElementCollection
+	@CollectionTable(name = "interview_setup_tech_stack",
+			joinColumns = @JoinColumn(name = "setup_id"))
+	@Column(name = "technology")
+	private List<String> techStack;
+
+	@Enumerated(EnumType.STRING)
+	private InterviewLevel interviewLevel; // BEGINNER, INTERMEDIATE, EXPERT
+
+	private Integer yearsOfExperience; // nullable, only for TECHNICAL
+
+	// total number of questions to ask in this interview
+	@Column(nullable = false)
+	private int totalQuestions = 10; // default 10
+
+	// who created this setup
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "user_id", nullable = false)
+	@JsonBackReference
 	private User user;
-	
-	@OneToMany(mappedBy = "interviewSetup")
+
+	// all sessions run under this setup
+	@OneToMany(mappedBy = "interviewSetup", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@JsonManagedReference
 	private List<InterviewSession> interviewSessions;
-	
-	
-	//getter and setter
-	public List<InterviewSession> getInterviewSessions() {
-		return interviewSessions;
-	}
-	public void setInterviewSessions(List<InterviewSession> interviewSessions) {
-		this.interviewSessions = interviewSessions;
-	}
-	public User getUser() {
-		return user;
-	}
-	public void setUser(User user) {
-		this.user = user;
-	}
-	public int getId() {
-		return id;
-	}
-	public void setId(int id) {
-		this.id = id;
-	}
-	
-	public String getInterviewLevel() {
-		return interviewLevel;
-	}
-	public void setInterviewLevel(String interviewLevel) {
-		this.interviewLevel = interviewLevel;
-	}
-	public String getProgrammingLanguage() {
-		return programmingLanguage;
-	}
-	public void setProgrammingLanguage(String programmingLanguage) {
-		this.programmingLanguage = programmingLanguage;
-	}
-	
-	
 }
