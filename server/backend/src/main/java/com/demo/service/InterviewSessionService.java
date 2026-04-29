@@ -6,7 +6,9 @@ import com.demo.model.SessionStatus;
 import com.demo.repository.InterviewSessionRepository;
 import com.demo.repository.InterviewSetupRepository;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -19,6 +21,7 @@ public class InterviewSessionService {
 
     // called when user clicks "Start Interview" on frontend
     // creates a new session and returns the sessionToken for WebSocket connection
+    @Transactional
     public InterviewSession startSession(Long setupId) {
         InterviewSetup setup = interviewSetupRepository.findById(setupId)
                 .orElseThrow(() -> new RuntimeException("Setup not found: " + setupId));
@@ -33,6 +36,7 @@ public class InterviewSessionService {
     }
 
     // called when all questions are done
+    @Transactional
     public InterviewSession completeSession(String sessionToken, double overallScore) {
         InterviewSession session = getSessionByToken(sessionToken);
         session.setStatus(SessionStatus.COMPLETED);
@@ -42,6 +46,7 @@ public class InterviewSessionService {
     }
 
     // called if user closes browser or disconnects mid-interview
+    @Transactional
     public InterviewSession abandonSession(String sessionToken) {
         InterviewSession session = getSessionByToken(sessionToken);
         if (session.getStatus() == SessionStatus.IN_PROGRESS) {
@@ -53,14 +58,23 @@ public class InterviewSessionService {
     }
 
     // increment violation count and save
+    @Transactional
     public void recordViolation(String sessionToken) {
         InterviewSession session = getSessionByToken(sessionToken);
         session.setProctorViolationCount(session.getProctorViolationCount() + 1);
         interviewSessionRepository.save(session);
     }
 
+    @Transactional(readOnly = true)
     public InterviewSession getSessionByToken(String sessionToken) {
-        return interviewSessionRepository.findBySessionToken(sessionToken)
+        InterviewSession session = interviewSessionRepository
+                .findBySessionTokenWithSetup(sessionToken)
                 .orElseThrow(() -> new RuntimeException("Session not found: " + sessionToken));
+
+        // Force initialization of lazy collections that will be needed in WebSocket handler
+        InterviewSetup setup = session.getInterviewSetup();
+        Hibernate.initialize(setup.getTechStack());
+
+        return session;
     }
 }

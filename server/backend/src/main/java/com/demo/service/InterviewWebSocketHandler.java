@@ -194,12 +194,13 @@ public class InterviewWebSocketHandler extends TextWebSocketHandler {
                                      InterviewSession interviewSession,
                                      ProctorEventPayload event) {
         // log violation to DB
-        ProctorLog log = ProctorLog.builder()
+        ProctorLog proctorLog = ProctorLog.builder()
                 .violationType(event.getViolationType())
                 .details(event.getDetails())
                 .interviewSession(interviewSession)
                 .build();
-        proctorLogRepository.save(log);
+
+        proctorLogRepository.save(proctorLog);
 
         // increment violation counter on session
         sessionService.recordViolation(sessionToken);
