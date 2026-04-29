@@ -27,35 +27,31 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            // disable CSRF — not needed for stateless JWT APIs
-            .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> {})
 
-            // define which routes are public and which require auth
-            .authorizeHttpRequests(auth -> auth
-                // public routes — no token needed
-                .requestMatchers(
-                    "/api/auth/**",       // register, login
-                    "/ws/**"              // WebSocket handshake endpoint
-                ).permitAll()
-                // everything else requires a valid JWT
-                .anyRequest().authenticated()
-            )
+                .csrf(AbstractHttpConfigurer::disable)
 
-            // stateless — no session, every request must carry JWT
-            .sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/",
+                                "/**/*.html",
+                                "/api/auth/**",
+                                "/ws/**"
+                        ).permitAll()
+                        .anyRequest().authenticated()
+                )
 
-            // use our custom auth provider
-            .authenticationProvider(authenticationProvider())
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
 
-            // add JWT filter before Spring's default username/password filter
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .authenticationProvider(authenticationProvider())
+
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
-    // uses BCrypt to verify passwords during login
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
@@ -64,13 +60,11 @@ public class SecurityConfig {
         return provider;
     }
 
-    // BCrypt password encoder — used when registering and logging in
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    // needed by AuthService to manually authenticate during login
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();

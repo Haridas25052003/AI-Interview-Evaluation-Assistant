@@ -29,4 +29,7 @@ public interface InterviewSessionRepository extends JpaRepository<InterviewSessi
 
     // check if a session with this token is still in progress (used in WebSocket handler)
     boolean existsBySessionTokenAndStatus(String sessionToken, SessionStatus status);
+
+    @Query("SELECT s FROM InterviewSession s JOIN FETCH s.interviewSetup WHERE s.sessionToken = :token")
+    Optional<InterviewSession> findBySessionTokenWithSetup(@Param("token") String token);
 }
