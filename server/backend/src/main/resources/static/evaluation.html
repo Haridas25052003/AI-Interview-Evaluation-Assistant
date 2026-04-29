@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>AI Interviewer — Evaluation Report</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+    <style>
+        :root {
+          --bg:      #050508;
+          --surface: #0d0d14;
+          --border:  #1e1e2e;
+          --accent:  #6ee7b7;
+          --accent2: #818cf8;
+          --text:    #e2e8f0;
+          --muted:   #64748b;
+          --error:   #f87171;
+          --warn:    #fbbf24;
+          --radius:  12px;
+        }
+        *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+        body {
+          font-family:'DM Mono',monospace;
+          background:var(--bg); color:var(--text);
+          min-height:100vh; display:flex; flex-direction:column;
+        }
+
+        /* NAV */
+        nav {
+          display:flex; align-items:center; justify-content:space-between;
+          padding:16px 48px;
+          border-bottom:1px solid var(--border);
+          background:var(--surface);
+          position:sticky; top:0; z-index:50;
+        }
+        .nav-brand { font-family:'Syne',sans-serif; font-size:15px; font-weight:800; color:var(--accent); }
+        .nav-actions { display:flex; align-items:center; gap:12px; }
+        .nav-btn {
+          padding:8px 18px; border-radius:8px;
+          font-family:'DM Mono',monospace; font-size:12px;
+          cursor:pointer; transition:all .2s; border:1px solid var(--border);
+          background:none; color:var(--muted);
+        }
+        .nav-btn:hover { color:var(--text); border-color:var(--muted); }
+        .nav-btn.primary {
+          background:var(--accent); color:#050508;
+          border-color:var(--accent); font-weight:700;
+        }
+        .nav-btn.primary:hover { opacity:.88; }
+
+        /* TABS */
+        .page-tabs {
+          display:flex; gap:0;
+          border-bottom:1px solid var(--border);
+          padding:0 48px;
+          background:var(--surface);
+        }
+        .page-tab {
+          padding:14px 24px;
+          font-size:12px; cursor:pointer;
+          border-bottom:2px solid transparent;
+          color:var(--muted); transition:all .2s;
+          background:none; border-top:none; border-left:none; border-right:none;
+          font-family:'DM Mono',monospace;
+        }
+        .page-tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+
+        /* MAIN */
+        main { flex:1; padding:40px 48px; max-width:1100px; margin:0 auto; width:100%; }
+
+        .page { display:none; }
+        .page.active { display:block; animation:fadeUp .4s ease; }
+
+        @keyframes fadeUp {
+          from{opacity:0;transform:translateY(14px)}
+          to  {opacity:1;transform:translateY(0)}
+        }
+
+        /* ── REPORT PAGE ── */
+        .report-header {
+          display:flex; align-items:flex-start;
+          justify-content:space-between; gap:24px;
+          margin-bottom:36px;
+        }
+        .report-tag {
+          font-size:11px; letter-spacing:3px; text-transform:uppercase;
+          color:var(--accent); margin-bottom:10px;
+        }
+        .report-title {
+          font-family:'Syne',sans-serif; font-size:28px; font-weight:800;
+          margin-bottom:6px;
+        }
+        .report-meta { font-size:12px; color:var(--muted); line-height:1.8; }
+        .report-meta span { color:var(--text); }
+
+        /* big score circle */
+        .score-circle {
+          flex-shrink:0;
+          width:120px; height:120px;
+          border-radius:50%;
+          border:3px solid var(--accent);
+          display:flex; flex-direction:column;
+          align-items:center; justify-content:center;
+          background:rgba(110,231,183,.06);
+          box-shadow:0 0 32px rgba(110,231,183,.12);
+        }
+        .score-circle .big-num {
+          font-family:'Syne',sans-serif; font-size:32px; font-weight:800;
+          color:var(--accent); line-height:1;
+        }
+        .score-circle .score-denom { font-size:11px; color:var(--muted); }
+        .score-circle .band-label {
+          font-size:11px; color:var(--accent); margin-top:4px; letter-spacing:1px;
+        }
+
+        /* grid layout */
+        .report-grid {
+          display:grid; grid-template-columns:1fr 1fr;
+          gap:20px; margin-bottom:20px;
+        }
+        .report-grid.three { grid-template-columns:1fr 1fr 1fr; }
+        .full-width { grid-column:1/-1; }
+
+        /* cards */
+        .card {
+          background:var(--surface);
+          border:1px solid var(--border);
+          border-radius:var(--radius);
+          padding:24px 28px;
+        }
+        .card-title {
+          font-size:10px; letter-spacing:3px; text-transform:uppercase;
+          color:var(--muted); margin-bottom:18px;
+        }
+
+        /* recommendation badge */
+        .rec-badge {
+          display:inline-flex; align-items:center; gap:8px;
+          padding:8px 18px; border-radius:20px;
+          font-family:'Syne',sans-serif; font-size:13px; font-weight:700;
+          margin-bottom:12px;
+        }
+        .rec-badge.RECOMMENDED    { background:rgba(110,231,183,.15); border:1px solid var(--accent);  color:var(--accent); }
+        .rec-badge.MAYBE          { background:rgba(251,191,36,.12);  border:1px solid var(--warn);    color:var(--warn); }
+        .rec-badge.NOT_RECOMMENDED{ background:rgba(248,113,113,.12); border:1px solid var(--error);   color:var(--error); }
+
+        /* stat items */
+        .stat-row { display:flex; flex-direction:column; gap:12px; }
+        .stat-item {
+          display:flex; align-items:center; justify-content:space-between;
+          padding:10px 0; border-bottom:1px solid var(--border);
+        }
+        .stat-item:last-child { border:none; }
+        .stat-lbl { font-size:12px; color:var(--muted); }
+        .stat-val { font-family:'Syne',sans-serif; font-size:14px; font-weight:700; }
+
+        /* 5 score bars */
+        .score-bars { display:flex; flex-direction:column; gap:14px; }
+        .score-bar-item {}
+        .score-bar-top {
+          display:flex; justify-content:space-between;
+          font-size:11px; margin-bottom:6px;
+        }
+        .score-bar-lbl { color:var(--muted); }
+        .score-bar-val { color:var(--text); font-weight:700; }
+        .score-bar-track {
+          height:6px; background:var(--border); border-radius:3px; overflow:hidden;
+        }
+        .score-bar-fill {
+          height:100%; border-radius:3px;
+          background:var(--accent); transition:width 1s ease;
+          width:0%;
+        }
+
+        /* feedback text */
+        .feedback-block {
+          font-size:13px; color:var(--text); line-height:1.8;
+        }
+        .feedback-block p { margin-bottom:10px; }
+
+        /* question breakdown */
+        .breakdown-list { display:flex; flex-direction:column; gap:16px; margin-top:4px; }
+        .breakdown-item {
+          background:var(--bg);
+          border:1px solid var(--border);
+          border-radius:10px;
+          padding:18px 20px;
+          transition:border-color .2s;
+        }
+        .breakdown-item:hover { border-color:var(--accent); }
+        .breakdown-top {
+          display:flex; align-items:flex-start;
+          justify-content:space-between; gap:12px; margin-bottom:10px;
+        }
+        .breakdown-q {
+          font-size:13px; color:var(--text); line-height:1.5; flex:1;
+        }
+        .breakdown-q-num {
+          font-family:'Syne',sans-serif; font-size:11px;
+          color:var(--muted); margin-bottom:4px;
+          display:flex; align-items:center; gap:8px;
+        }
+        .mini-badge {
+          font-size:9px; padding:2px 8px; border-radius:10px; letter-spacing:1px;
+        }
+        .mini-badge.followup { background:rgba(129,140,248,.15); color:var(--accent2); }
+        .mini-badge.skipped  { background:rgba(248,113,113,.12); color:var(--error); }
+        .breakdown-score {
+          font-family:'Syne',sans-serif; font-size:20px; font-weight:800;
+          color:var(--accent); flex-shrink:0;
+        }
+        .breakdown-answer {
+          font-size:12px; color:var(--muted); line-height:1.6;
+          margin-bottom:10px; font-style:italic;
+        }
+        .mini-scores {
+          display:flex; gap:10px; flex-wrap:wrap;
+        }
+        .mini-score {
+          background:var(--surface); border:1px solid var(--border);
+          border-radius:6px; padding:4px 10px;
+          font-size:11px; display:flex; flex-direction:column; align-items:center; gap:2px;
+        }
+        .mini-score-val { font-weight:700; color:var(--text); }
+        .mini-score-lbl { font-size:9px; color:var(--muted); letter-spacing:1px; }
+        .breakdown-feedback {
+          font-size:11px; color:var(--muted); margin-top:10px;
+          padding-top:10px; border-top:1px solid var(--border); line-height:1.6;
+        }
+        .response-time { font-size:10px; color:var(--muted); margin-top:6px; }
+
+        /* ── HISTORY PAGE ── */
+        .history-header {
+          margin-bottom:28px;
+        }
+        .history-title {
+          font-family:'Syne',sans-serif; font-size:22px; font-weight:800; margin-bottom:6px;
+        }
+        .history-sub { font-size:12px; color:var(--muted); }
+
+        .history-list { display:flex; flex-direction:column; gap:14px; }
+        .history-item {
+          background:var(--surface);
+          border:1px solid var(--border);
+          border-radius:var(--radius);
+          padding:20px 24px;
+          display:flex; align-items:center; gap:20px;
+          cursor:pointer; transition:all .2s;
+        }
+        .history-item:hover { border-color:var(--accent); transform:translateX(4px); }
+        .history-score-badge {
+          width:56px; height:56px; border-radius:50%;
+          display:flex; flex-direction:column; align-items:center; justify-content:center;
+          border:2px solid var(--accent); flex-shrink:0;
+          background:rgba(110,231,183,.06);
+        }
+        .history-score-num {
+          font-family:'Syne',sans-serif; font-size:16px; font-weight:800; color:var(--accent);
+        }
+        .history-score-denom { font-size:9px; color:var(--muted); }
+        .history-info { flex:1; }
+        .history-type {
+          font-family:'Syne',sans-serif; font-size:14px; font-weight:700; margin-bottom:4px;
+        }
+        .history-meta { font-size:11px; color:var(--muted); }
+        .history-band {
+          font-size:11px; padding:4px 12px; border-radius:20px;
+          font-weight:700; flex-shrink:0;
+        }
+        .history-band.Excellent     { background:rgba(110,231,183,.15); color:var(--accent); }
+        .history-band.Good          { background:rgba(129,140,248,.15); color:var(--accent2); }
+        .history-band.Average       { background:rgba(251,191,36,.12);  color:var(--warn); }
+        .history-band.Below-Average { background:rgba(248,113,113,.12); color:var(--error); }
+        .history-band.Poor          { background:rgba(248,113,113,.12); color:var(--error); }
+
+        .empty-state {
+          text-align:center; padding:60px 0; color:var(--muted);
+        }
+        .empty-state .empty-icon { font-size:40px; margin-bottom:14px; }
+        .empty-state p { font-size:13px; line-height:1.7; }
+
+        /* loading skeleton */
+        .skeleton {
+          background:linear-gradient(90deg, var(--border) 25%, var(--surface) 50%, var(--border) 75%);
+          background-size:200% 100%;
+          animation:shimmer 1.5s infinite;
+          border-radius:6px;
+        }
+        @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+        .toast {
+          position:fixed; bottom:24px; right:28px;
+          padding:13px 20px; border-radius:8px; font-size:12px;
+          transform:translateY(60px); opacity:0;
+          transition:all .35s cubic-bezier(.34,1.56,.64,1); z-index:999;
+        }
+        .toast.show { transform:translateY(0); opacity:1; }
+        .toast.success { background:rgba(110,231,183,.15); border:1px solid var(--accent); color:var(--accent); }
+        .toast.error   { background:rgba(248,113,113,.12); border:1px solid var(--error);  color:var(--error); }
+    </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+    <div class="nav-brand">AI Interviewer</div>
+    <div class="nav-actions">
+        <button class="nav-btn" onclick="goNewInterview()">+ New Interview</button>
+        <button class="nav-btn primary" id="download-btn" onclick="downloadPDF()">⬇ Download PDF</button>
+    </div>
+</nav>
+
+<!-- TABS -->
+<div class="page-tabs">
+    <button class="page-tab active" onclick="switchPage('report')">Evaluation Report</button>
+    <button class="page-tab"        onclick="switchPage('history')">Interview History</button>
+</div>
+
+<main>
+
+    <!-- ══════════════════ REPORT PAGE ══════════════════ -->
+    <div class="page active" id="page-report">
+
+        <!-- Header -->
+        <div class="report-header">
+            <div>
+                <div class="report-tag">// Evaluation Complete</div>
+                <div class="report-title" id="rpt-title">Interview Evaluation</div>
+                <div class="report-meta" id="rpt-meta">Loading report...</div>
+            </div>
+            <div class="score-circle">
+                <div class="big-num" id="rpt-score">—</div>
+                <div class="score-denom">/ 10</div>
+                <div class="band-label" id="rpt-band">—</div>
+            </div>
+        </div>
+
+        <!-- Row 1: recommendation + stats + score bars -->
+        <div class="report-grid three" style="margin-bottom:20px">
+
+            <!-- Recommendation -->
+            <div class="card">
+                <div class="card-title">// Recommendation</div>
+                <div class="rec-badge" id="rec-badge">—</div>
+                <div class="feedback-block" id="rec-text" style="font-size:12px;color:var(--muted)"></div>
+            </div>
+
+            <!-- Stats -->
+            <div class="card">
+                <div class="card-title">// Interview Stats</div>
+                <div class="stat-row" id="stat-row">
+                    <div class="stat-item"><span class="stat-lbl">Total Questions</span><span class="stat-val" id="st-total">—</span></div>
+                    <div class="stat-item"><span class="stat-lbl">Answered</span><span class="stat-val" id="st-answered">—</span></div>
+                    <div class="stat-item"><span class="stat-lbl">Skipped</span><span class="stat-val" id="st-skipped">—</span></div>
+                    <div class="stat-item"><span class="stat-lbl">Violations</span><span class="stat-val" id="st-violations">—</span></div>
+                    <div class="stat-item"><span class="stat-lbl">Duration</span><span class="stat-val" id="st-duration">—</span></div>
+                </div>
+            </div>
+
+            <!-- Score bars -->
+            <div class="card">
+                <div class="card-title">// Average Scores</div>
+                <div class="score-bars" id="score-bars">
+                    <!-- generated by JS -->
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Row 2: strengths + areas to improve -->
+        <div class="report-grid" style="margin-bottom:20px">
+            <div class="card">
+                <div class="card-title">// Strengths</div>
+                <div class="feedback-block" id="strengths-text">—</div>
+            </div>
+            <div class="card">
+                <div class="card-title">// Areas to Improve</div>
+                <div class="feedback-block" id="improve-text">—</div>
+            </div>
+        </div>
+
+        <!-- Row 3: question breakdown -->
+        <div class="card full-width">
+            <div class="card-title">// Question Breakdown</div>
+            <div class="breakdown-list" id="breakdown-list">
+                <!-- generated by JS -->
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ══════════════════ HISTORY PAGE ══════════════════ -->
+    <div class="page" id="page-history">
+        <div class="history-header">
+            <div class="history-title">Interview History</div>
+            <div class="history-sub">All your past interview sessions and evaluations</div>
+        </div>
+        <div class="history-list" id="history-list">
+            <div style="display:flex;flex-direction:column;gap:14px">
+                <div class="skeleton" style="height:88px"></div>
+                <div class="skeleton" style="height:88px"></div>
+                <div class="skeleton" style="height:88px"></div>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    const API          = 'http://localhost:8080/api';
+    const token        = localStorage.getItem('token');
+    const sessionToken = new URLSearchParams(window.location.search).get('session')
+                         || localStorage.getItem('sessionToken');
+
+    if (!token) window.location.href = 'auth.html';
+
+    let reportData = null;
+
+    // ── PAGE SWITCH ──
+    function switchPage(page) {
+      document.querySelectorAll('.page-tab').forEach((t,i) =>
+        t.classList.toggle('active', (page === 'report' ? 0 : 1) === i));
+      document.getElementById('page-report').classList.toggle('active', page === 'report');
+      document.getElementById('page-history').classList.toggle('active', page !== 'report');
+
+      if (page === 'history') loadHistory();
+    }
+
+    // ══════════════════════════════════════════════
+    // LOAD REPORT
+    // ══════════════════════════════════════════════
+    async function loadReport() {
+      if (!sessionToken) {
+        document.getElementById('rpt-meta').textContent = 'No session found.';
+        return;
+      }
+      try {
+        const res  = await fetch(`${API}/evaluation/${sessionToken}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error('Report not found');
+        reportData = await res.json();
+        renderReport(reportData);
+      } catch (e) {
+        showToast('Could not load report: ' + e.message, 'error');
+      }
+    }
+
+    function renderReport(r) {
+      // header
+      document.getElementById('rpt-title').textContent =
+        (r.interviewType === 'TECHNICAL'
+          ? `Technical Interview — ${(r.techStack || []).join(', ')}`
+          : 'HR Interview') + ' Evaluation';
+
+      const start = r.startTime ? new Date(r.startTime) : null;
+      const end   = r.endTime   ? new Date(r.endTime)   : null;
+      const dur   = (start && end)
+        ? Math.round((end - start) / 60000) + ' min'
+        : '—';
+
+      document.getElementById('rpt-meta').innerHTML = `
+        Type: <span>${r.interviewType}</span> &nbsp;|&nbsp;
+        ${r.interviewLevel ? `Level: <span>${r.interviewLevel}</span> &nbsp;|&nbsp;` : ''}
+        Date: <span>${start ? start.toLocaleDateString('en-IN', {day:'2-digit',month:'short',year:'numeric'}) : '—'}</span> &nbsp;|&nbsp;
+        Duration: <span>${dur}</span>
+      `;
+
+      // score circle
+      document.getElementById('rpt-score').textContent = r.overallScore?.toFixed(1) ?? '—';
+      document.getElementById('rpt-band').textContent  = r.performanceBand ?? '—';
+
+      // recommendation
+      const rec = r.recommendation || 'MAYBE';
+      const recEl = document.getElementById('rec-badge');
+      recEl.textContent = rec.replace('_', ' ');
+      recEl.className = `rec-badge ${rec}`;
+      document.getElementById('rec-text').textContent =
+        rec === 'RECOMMENDED'     ? 'The candidate performed well and is recommended to proceed.' :
+        rec === 'MAYBE'           ? 'The candidate showed potential but may need further evaluation.' :
+                                    'The candidate did not meet the required standard for this role.';
+
+      // stats
+      document.getElementById('st-total').textContent     = r.totalQuestions ?? '—';
+      document.getElementById('st-answered').textContent  = r.answeredQuestions ?? '—';
+      document.getElementById('st-skipped').textContent   = r.skippedQuestions ?? '—';
+      document.getElementById('st-violations').textContent= r.totalViolations ?? '0';
+      document.getElementById('st-duration').textContent  = dur;
+
+      // strengths / improve
+      document.getElementById('strengths-text').textContent = r.strengths || '—';
+      document.getElementById('improve-text').textContent   = r.areasToImprove || '—';
+
+      // score bars (compute averages from breakdown)
+      renderScoreBars(r.questionBreakdown || []);
+
+      // question breakdown
+      renderBreakdown(r.questionBreakdown || []);
+    }
+
+    // ── SCORE BARS ──
+    function renderScoreBars(questions) {
+      const answered = questions.filter(q => !q.wasSkipped);
+      if (!answered.length) return;
+
+      const avg = key => answered.reduce((s, q) => s + (q[key] || 0), 0) / answered.length;
+
+      const bars = [
+        { label:'Relevance',    val: avg('relevanceScore') },
+        { label:'Concept',      val: avg('conceptScore') },
+        { label:'Clarity',      val: avg('clarityScore') },
+        { label:'Grammar',      val: avg('grammarScore') },
+        { label:'Completeness', val: avg('completenessScore') },
+      ];
+
+      document.getElementById('score-bars').innerHTML = bars.map(b => `
+        <div class="score-bar-item">
+          <div class="score-bar-top">
+            <span class="score-bar-lbl">${b.label}</span>
+            <span class="score-bar-val">${b.val.toFixed(1)}/10</span>
+          </div>
+          <div class="score-bar-track">
+            <div class="score-bar-fill" style="width:${(b.val/10)*100}%"></div>
+          </div>
+        </div>
+      `).join('');
+
+      // animate bars in
+      setTimeout(() => {
+        document.querySelectorAll('.score-bar-fill').forEach(el => {
+          el.style.width = el.style.width; // trigger repaint — already set above
+        });
+      }, 100);
+    }
+
+    // ── QUESTION BREAKDOWN ──
+    function renderBreakdown(questions) {
+      if (!questions.length) {
+        document.getElementById('breakdown-list').innerHTML =
+          '<div style="color:var(--muted);font-size:13px">No questions found.</div>';
+        return;
+      }
+
+      document.getElementById('breakdown-list').innerHTML = questions.map(q => `
+        <div class="breakdown-item">
+          <div class="breakdown-top">
+            <div class="breakdown-q">
+              <div class="breakdown-q-num">
+                Q${q.questionNumber}
+                ${q.isFollowUp  ? '<span class="mini-badge followup">FOLLOW-UP</span>' : ''}
+                ${q.wasSkipped  ? '<span class="mini-badge skipped">SKIPPED</span>'    : ''}
+              </div>
+              <div>${q.questionText}</div>
+            </div>
+            <div class="breakdown-score">${q.wasSkipped ? '—' : q.overallScore?.toFixed(1)}</div>
+          </div>
+
+          ${!q.wasSkipped && q.userAnswer ? `
+            <div class="breakdown-answer">"${q.userAnswer}"</div>
+            <div class="mini-scores">
+              <div class="mini-score"><div class="mini-score-val">${q.relevanceScore}</div><div class="mini-score-lbl">RELEVANCE</div></div>
+              <div class="mini-score"><div class="mini-score-val">${q.conceptScore}</div><div class="mini-score-lbl">CONCEPT</div></div>
+              <div class="mini-score"><div class="mini-score-val">${q.clarityScore}</div><div class="mini-score-lbl">CLARITY</div></div>
+              <div class="mini-score"><div class="mini-score-val">${q.grammarScore}</div><div class="mini-score-lbl">GRAMMAR</div></div>
+              <div class="mini-score"><div class="mini-score-val">${q.completenessScore}</div><div class="mini-score-lbl">COMPLETE</div></div>
+            </div>
+            <div class="breakdown-feedback">💬 ${q.feedbackSummary || '—'}</div>
+            ${q.responseTimeSeconds ? `<div class="response-time">⏱ Response time: ${q.responseTimeSeconds}s</div>` : ''}
+          ` : `<div class="breakdown-answer" style="color:var(--error)">This question was skipped.</div>`}
+        </div>
+      `).join('');
+    }
+
+    // ══════════════════════════════════════════════
+    // LOAD HISTORY
+    // ══════════════════════════════════════════════
+    async function loadHistory() {
+      try {
+        const res  = await fetch(`${API}/evaluation/history`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const list = await res.json();
+        renderHistory(list);
+      } catch (e) {
+        document.getElementById('history-list').innerHTML =
+          '<div class="empty-state"><div class="empty-icon">⚠️</div><p>Could not load history.</p></div>';
+      }
+    }
+
+    function renderHistory(list) {
+      if (!list.length) {
+        document.getElementById('history-list').innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">📋</div>
+            <p>No interview history yet.<br/>Complete an interview to see your results here.</p>
+          </div>`;
+        return;
+      }
+
+      document.getElementById('history-list').innerHTML = list.map(r => {
+        const date = r.startTime
+          ? new Date(r.startTime).toLocaleDateString('en-IN', {day:'2-digit',month:'short',year:'numeric'})
+          : '—';
+        const type = r.interviewType === 'TECHNICAL'
+          ? `Technical — ${(r.techStack || []).join(', ')}`
+          : 'HR Interview';
+        const band = (r.performanceBand || 'Average').replace(' ', '-');
+
+        return `
+          <div class="history-item" onclick="viewReport('${r.sessionToken}')">
+            <div class="history-score-badge">
+              <div class="history-score-num">${r.overallScore?.toFixed(1) ?? '—'}</div>
+              <div class="history-score-denom">/10</div>
+            </div>
+            <div class="history-info">
+              <div class="history-type">${type}</div>
+              <div class="history-meta">${date} &nbsp;|&nbsp; ${r.totalQuestions} questions &nbsp;|&nbsp; ${r.answeredQuestions} answered</div>
+            </div>
+            <div class="history-band ${band}">${r.performanceBand ?? '—'}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function viewReport(token) {
+      window.location.href = `evaluation.html?session=${token}`;
+    }
+
+    // ══════════════════════════════════════════════
+    // PDF DOWNLOAD
+    // ══════════════════════════════════════════════
+    async function downloadPDF() {
+    if (!sessionToken) {
+        showToast('No session to download', 'error');
+        return;
+    }
+
+    showToast('Preparing PDF...', 'success');
+
+    try {
+        const response = await fetch(`${API}/evaluation/download/${sessionToken}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Download failed: ${response.status}`);
+        }
+
+        // Convert response to blob
+        const blob = await response.blob();
+
+        // Create a download link
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `interview-report-${sessionToken.substring(0, 8)}.pdf`);
+
+        // Append to body, click, and remove
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        // Clean up the object URL
+        window.URL.revokeObjectURL(url);
+
+        showToast('PDF downloaded successfully!', 'success');
+
+    } catch (error) {
+        console.error('Download failed:', error);
+        showToast('Failed to download PDF. Please try again.', 'error');
+    }
+}
+
+    // ══════════════════════════════════════════════
+    // HELPERS
+    // ══════════════════════════════════════════════
+    function goNewInterview() {
+      localStorage.removeItem('sessionToken');
+      window.location.href = 'setup.html';
+    }
+
+    function showToast(msg, type = 'success') {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = `toast ${type} show`;
+      setTimeout(() => t.classList.remove('show'), 3500);
+    }
+
+    // ── INIT ──
+    loadReport();
+</script>
+</body>
+</html>
