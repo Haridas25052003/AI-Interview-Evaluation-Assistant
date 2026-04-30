@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>AI Interviewer — Profile</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+          --bg:      #050508;
+          --surface: #0d0d14;
+          --border:  #1e1e2e;
+          --accent:  #6ee7b7;
+          --accent2: #818cf8;
+          --text:    #e2e8f0;
+          --muted:   #64748b;
+          --error:   #f87171;
+          --warn:    #fbbf24;
+          --radius:  12px;
+        }
+        *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+        body {
+          font-family:'DM Mono',monospace;
+          background:var(--bg); color:var(--text);
+          min-height:100vh; display:flex; flex-direction:column;
+        }
+
+        /* ── NAV ── */
+        nav {
+          display:flex; align-items:center; justify-content:space-between;
+          padding:16px 48px;
+          border-bottom:1px solid var(--border);
+          background:var(--surface);
+          position:sticky; top:0; z-index:50;
+        }
+        .nav-brand { font-family:'Syne',sans-serif; font-size:15px; font-weight:800; color:var(--accent); }
+        .nav-links  { display:flex; gap:8px; }
+        .nav-link {
+          padding:8px 16px; border-radius:8px;
+          font-family:'DM Mono',monospace; font-size:12px;
+          cursor:pointer; border:1px solid var(--border);
+          background:none; color:var(--muted); transition:all .2s;
+          text-decoration:none; display:inline-flex; align-items:center;
+        }
+        .nav-link:hover   { color:var(--text); border-color:var(--muted); }
+        .nav-link.primary {
+          background:var(--accent); color:#050508;
+          border-color:var(--accent); font-weight:700;
+        }
+        .nav-link.primary:hover { opacity:.88; }
+        .nav-link.active { color:var(--accent); border-color:var(--accent); }
+
+        /* ── LAYOUT ── */
+        .layout {
+          display:grid;
+          grid-template-columns:280px 1fr;
+          gap:0; flex:1;
+        }
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+          border-right:1px solid var(--border);
+          background:var(--surface);
+          padding:32px 24px;
+          display:flex; flex-direction:column; gap:28px;
+          position:sticky; top:57px;
+          height:calc(100vh - 57px);
+          overflow-y:auto;
+        }
+
+        .avatar-wrap {
+          display:flex; flex-direction:column; align-items:center; gap:14px;
+        }
+        .avatar {
+          width:80px; height:80px; border-radius:50%;
+          background:linear-gradient(135deg, var(--accent), var(--accent2));
+          display:flex; align-items:center; justify-content:center;
+          font-family:'Syne',sans-serif; font-size:28px; font-weight:800;
+          color:#050508;
+          box-shadow:0 0 32px rgba(110,231,183,.2);
+        }
+        .profile-name {
+          font-family:'Syne',sans-serif; font-size:17px; font-weight:700;
+          text-align:center;
+        }
+        .profile-email { font-size:11px; color:var(--muted); text-align:center; }
+
+        /* quick stats in sidebar */
+        .quick-stats { display:flex; flex-direction:column; gap:10px; }
+        .quick-stat {
+          background:var(--bg);
+          border:1px solid var(--border);
+          border-radius:10px; padding:14px 16px;
+          display:flex; align-items:center; justify-content:space-between;
+        }
+        .qs-label { font-size:11px; color:var(--muted); }
+        .qs-val   { font-family:'Syne',sans-serif; font-size:18px; font-weight:800; color:var(--accent); }
+
+        /* sidebar badge */
+        .perf-badge {
+          text-align:center; padding:14px;
+          border-radius:10px; border:1px solid var(--border);
+        }
+        .perf-badge-label { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
+        .perf-badge-val   { font-family:'Syne',sans-serif; font-size:22px; font-weight:800; }
+        .perf-badge-val.Excellent     { color:#22c55e; }
+        .perf-badge-val.Good          { color:var(--accent2); }
+        .perf-badge-val.Average       { color:var(--warn); }
+        .perf-badge-val.Poor          { color:var(--error); }
+
+        /* ── MAIN CONTENT ── */
+        .content { padding:32px 36px; overflow-y:auto; }
+
+        /* section headers */
+        .section-header {
+          display:flex; align-items:center; justify-content:space-between;
+          margin-bottom:20px;
+        }
+        .section-title {
+          font-family:'Syne',sans-serif; font-size:17px; font-weight:800;
+        }
+        .section-tag { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--accent); }
+
+        /* ── STAT CARDS ROW ── */
+        .stat-cards {
+          display:grid; grid-template-columns:repeat(4,1fr);
+          gap:14px; margin-bottom:28px;
+        }
+        .stat-card {
+          background:var(--surface);
+          border:1px solid var(--border);
+          border-radius:var(--radius);
+          padding:20px 22px;
+          position:relative; overflow:hidden;
+          animation:fadeUp .4s ease forwards;
+        }
+        .stat-card::before {
+          content:''; position:absolute; top:0; right:0;
+          width:60px; height:60px; border-radius:50%;
+          background:radial-gradient(circle, rgba(110,231,183,.08), transparent 70%);
+        }
+        .stat-card-label { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
+        .stat-card-val   { font-family:'Syne',sans-serif; font-size:28px; font-weight:800; color:var(--text); }
+        .stat-card-sub   { font-size:11px; color:var(--muted); margin-top:4px; }
+        .stat-card-icon  { position:absolute; top:18px; right:18px; font-size:20px; opacity:.5; }
+
+        /* ── CHARTS ── */
+        .charts-grid {
+          display:grid; grid-template-columns:1fr 1fr;
+          gap:18px; margin-bottom:28px;
+        }
+        .chart-card {
+          background:var(--surface);
+          border:1px solid var(--border);
+          border-radius:var(--radius);
+          padding:22px 24px;
+        }
+        .chart-card.full { grid-column:1/-1; }
+        .chart-title {
+          font-size:10px; letter-spacing:2px; text-transform:uppercase;
+          color:var(--muted); margin-bottom:18px;
+        }
+        .chart-wrap { position:relative; }
+
+        /* ── HISTORY TABLE ── */
+        .history-section {
+          background:var(--surface);
+          border:1px solid var(--border);
+          border-radius:var(--radius);
+          overflow:hidden; margin-bottom:28px;
+        }
+        .history-header-row {
+          display:grid;
+          grid-template-columns:48px 1fr 90px 90px 90px 100px 48px;
+          padding:12px 20px;
+          background:var(--bg);
+          border-bottom:1px solid var(--border);
+          font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted);
+        }
+        .history-row {
+          display:grid;
+          grid-template-columns:48px 1fr 90px 90px 90px 100px 48px;
+          padding:14px 20px;
+          border-bottom:1px solid var(--border);
+          align-items:center;
+          cursor:pointer; transition:background .2s;
+          font-size:12px;
+        }
+        .history-row:last-child { border:none; }
+        .history-row:hover { background:rgba(110,231,183,.03); }
+        .row-num {
+          font-family:'Syne',sans-serif; font-size:13px;
+          font-weight:700; color:var(--muted);
+        }
+        .row-type { font-size:12px; color:var(--text); }
+        .row-type-sub { font-size:10px; color:var(--muted); margin-top:2px; }
+        .row-score {
+          font-family:'Syne',sans-serif; font-size:15px;
+          font-weight:800; color:var(--accent);
+        }
+        .row-date { font-size:11px; color:var(--muted); }
+        .band-pill {
+          display:inline-flex; padding:3px 10px; border-radius:20px;
+          font-size:10px; font-weight:700; letter-spacing:1px;
+        }
+        .band-pill.Excellent     { background:rgba(34,197,94,.15);   color:#22c55e; }
+        .band-pill.Good          { background:rgba(129,140,248,.15); color:var(--accent2); }
+        .band-pill.Average       { background:rgba(251,191,36,.12);  color:var(--warn); }
+        .band-pill.Below-Average { background:rgba(248,113,113,.12); color:var(--error); }
+        .band-pill.Poor          { background:rgba(248,113,113,.12); color:var(--error); }
+        .row-action {
+          font-size:16px; text-align:center; color:var(--muted);
+          transition:color .2s;
+        }
+        .history-row:hover .row-action { color:var(--accent); }
+
+        /* ── SKILL BARS ── */
+        .skills-grid {
+          display:grid; grid-template-columns:1fr 1fr;
+          gap:18px; margin-bottom:28px;
+        }
+        .skills-card {
+          background:var(--surface);
+          border:1px solid var(--border);
+          border-radius:var(--radius);
+          padding:22px 24px;
+        }
+        .skill-item { margin-bottom:16px; }
+        .skill-item:last-child { margin-bottom:0; }
+        .skill-top {
+          display:flex; justify-content:space-between;
+          font-size:12px; margin-bottom:7px;
+        }
+        .skill-lbl { color:var(--muted); }
+        .skill-val { color:var(--text); font-weight:700; }
+        .skill-track {
+          height:6px; background:var(--border); border-radius:3px; overflow:hidden;
+        }
+        .skill-fill {
+          height:100%; border-radius:3px; transition:width 1.2s cubic-bezier(.4,0,.2,1);
+          background:linear-gradient(90deg, var(--accent), var(--accent2));
+          width:0%;
+        }
+
+        /* loading / empty */
+        .skeleton {
+          background:linear-gradient(90deg,var(--border) 25%,var(--surface) 50%,var(--border) 75%);
+          background-size:200% 100%; animation:shimmer 1.5s infinite;
+          border-radius:var(--radius);
+        }
+        @keyframes shimmer { 0%{background-position:200% 0}100%{background-position:-200% 0} }
+        @keyframes fadeUp  { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+
+        .empty {
+          text-align:center; padding:48px; color:var(--muted);
+        }
+        .empty-icon { font-size:36px; margin-bottom:12px; }
+        .empty p    { font-size:13px; line-height:1.7; }
+
+        /* toast */
+        .toast {
+          position:fixed; bottom:24px; right:28px;
+          padding:13px 20px; border-radius:8px; font-size:12px;
+          transform:translateY(60px); opacity:0;
+          transition:all .35s cubic-bezier(.34,1.56,.64,1); z-index:999;
+        }
+        .toast.show  { transform:translateY(0); opacity:1; }
+        .toast.success { background:rgba(110,231,183,.15); border:1px solid var(--accent); color:var(--accent); }
+        .toast.error   { background:rgba(248,113,113,.12); border:1px solid var(--error);  color:var(--error); }
+
+        @media(max-width:900px) {
+          .layout { grid-template-columns:1fr; }
+          .sidebar { position:static; height:auto; }
+          .stat-cards { grid-template-columns:1fr 1fr; }
+          .charts-grid { grid-template-columns:1fr; }
+          .skills-grid { grid-template-columns:1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+    <div class="nav-brand">AI Interviewer</div>
+    <div class="nav-links">
+        <a class="nav-link active" href="profile.html">Profile</a>
+        <a class="nav-link" href="evaluation.html">Reports</a>
+        <a class="nav-link primary" href="setup.html">+ New Interview</a>
+        <button class="nav-link" onclick="logout()" style="cursor:pointer">Logout</button>
+    </div>
+</nav>
+
+<div class="layout">
+
+    <!-- ── SIDEBAR ── -->
+    <div class="sidebar">
+
+        <!-- Avatar + name -->
+        <div class="avatar-wrap">
+            <div class="avatar" id="avatar-initials">—</div>
+            <div class="profile-name"  id="sidebar-name">Loading...</div>
+            <div class="profile-email" id="sidebar-email">—</div>
+        </div>
+
+        <!-- Quick stats -->
+        <div class="quick-stats">
+            <div class="quick-stat">
+                <span class="qs-label">Total Interviews</span>
+                <span class="qs-val" id="qs-total">—</span>
+            </div>
+            <div class="quick-stat">
+                <span class="qs-label">Best Score</span>
+                <span class="qs-val" id="qs-best">—</span>
+            </div>
+            <div class="quick-stat">
+                <span class="qs-label">Avg Score</span>
+                <span class="qs-val" id="qs-avg">—</span>
+            </div>
+            <div class="quick-stat">
+                <span class="qs-label">HR Interviews</span>
+                <span class="qs-val" id="qs-hr">—</span>
+            </div>
+            <div class="quick-stat">
+                <span class="qs-label">Technical</span>
+                <span class="qs-val" id="qs-tech">—</span>
+            </div>
+        </div>
+
+        <!-- Overall performance band -->
+        <div class="perf-badge">
+            <div class="perf-badge-label">Overall Performance</div>
+            <div class="perf-badge-val" id="overall-band">—</div>
+        </div>
+
+    </div>
+
+    <!-- ── MAIN CONTENT ── -->
+    <div class="content">
+
+        <!-- STAT CARDS -->
+        <div class="stat-cards" id="stat-cards">
+            <div class="skeleton" style="height:100px"></div>
+            <div class="skeleton" style="height:100px"></div>
+            <div class="skeleton" style="height:100px"></div>
+            <div class="skeleton" style="height:100px"></div>
+        </div>
+
+        <!-- CHARTS ROW -->
+        <div class="charts-grid">
+
+            <!-- Score trend line chart -->
+            <div class="chart-card">
+                <div class="chart-title">// Score Trend (Last 10 Interviews)</div>
+                <div class="chart-wrap" style="height:200px">
+                    <canvas id="chart-trend"></canvas>
+                </div>
+            </div>
+
+            <!-- Interview type doughnut -->
+            <div class="chart-card">
+                <div class="chart-title">// Interview Type Distribution</div>
+                <div class="chart-wrap" style="height:200px">
+                    <canvas id="chart-type"></canvas>
+                </div>
+            </div>
+
+            <!-- Score parameters radar -->
+            <div class="chart-card">
+                <div class="chart-title">// Average Score by Parameter</div>
+                <div class="chart-wrap" style="height:200px">
+                    <canvas id="chart-radar"></canvas>
+                </div>
+            </div>
+
+            <!-- Performance band bar -->
+            <div class="chart-card">
+                <div class="chart-title">// Performance Band Distribution</div>
+                <div class="chart-wrap" style="height:200px">
+                    <canvas id="chart-bands"></canvas>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- SKILL BARS -->
+        <div class="skills-grid">
+            <div class="skills-card">
+                <div class="chart-title">// Average Parameter Scores</div>
+                <div id="skill-bars">
+                    <!-- generated by JS -->
+                </div>
+            </div>
+            <div class="skills-card">
+                <div class="chart-title">// Interview Activity Summary</div>
+                <div id="activity-summary">
+                    <!-- generated by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- HISTORY TABLE -->
+        <div class="section-header">
+            <div>
+                <div class="section-tag">// All Sessions</div>
+                <div class="section-title">Interview History</div>
+            </div>
+        </div>
+        <div class="history-section">
+            <div class="history-header-row">
+                <div>#</div>
+                <div>Interview</div>
+                <div>Score</div>
+                <div>Questions</div>
+                <div>Date</div>
+                <div>Band</div>
+                <div></div>
+            </div>
+            <div id="history-rows">
+                <div class="skeleton" style="height:56px;margin:8px;border-radius:8px"></div>
+                <div class="skeleton" style="height:56px;margin:8px;border-radius:8px"></div>
+                <div class="skeleton" style="height:56px;margin:8px;border-radius:8px"></div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    const API   = 'http://localhost:8080/api';
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = 'auth.html';
+
+    // set user info from localStorage
+    const userName  = localStorage.getItem('userName')  || 'User';
+    const userEmail = localStorage.getItem('userEmail') || '—';
+    document.getElementById('sidebar-name').textContent  = userName;
+    document.getElementById('sidebar-email').textContent = userEmail;
+    document.getElementById('avatar-initials').textContent =
+      userName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+
+    let allReports = [];
+
+    // ══════════════════════════════════════════
+    // LOAD ALL DATA
+    // ══════════════════════════════════════════
+    async function loadAll() {
+      try {
+        const res = await fetch(`${API}/evaluation/history`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error('Failed to load history');
+        allReports = await res.json();
+        renderAll(allReports);
+      } catch (e) {
+        showToast('Could not load profile data', 'error');
+      }
+    }
+
+    function renderAll(reports) {
+      if (!reports.length) {
+        renderEmpty();
+        return;
+      }
+      renderStatCards(reports);
+      renderSidebarStats(reports);
+      renderCharts(reports);
+      renderSkillBars(reports);
+      renderActivitySummary(reports);
+      renderHistory(reports);
+    }
+
+    // ══════════════════════════════════════════
+    // SIDEBAR STATS
+    // ══════════════════════════════════════════
+    function renderSidebarStats(reports) {
+      const scores  = reports.map(r => r.overallScore || 0);
+      const avg     = scores.reduce((a, b) => a + b, 0) / scores.length;
+      const best    = Math.max(...scores);
+      const hrCount = reports.filter(r => r.interviewType === 'HR').length;
+      const techCount = reports.length - hrCount;
+
+      document.getElementById('qs-total').textContent = reports.length;
+      document.getElementById('qs-best').textContent  = best.toFixed(1);
+      document.getElementById('qs-avg').textContent   = avg.toFixed(1);
+      document.getElementById('qs-hr').textContent    = hrCount;
+      document.getElementById('qs-tech').textContent  = techCount;
+
+      const band = getOverallBand(avg);
+      const el   = document.getElementById('overall-band');
+      el.textContent  = band;
+      el.className    = 'perf-badge-val ' + band;
+    }
+
+    // ══════════════════════════════════════════
+    // STAT CARDS
+    // ══════════════════════════════════════════
+    function renderStatCards(reports) {
+      const scores    = reports.map(r => r.overallScore || 0);
+      const avg       = scores.reduce((a, b) => a + b, 0) / scores.length;
+      const best      = Math.max(...scores);
+      const answered  = reports.reduce((s, r) => s + (r.answeredQuestions || 0), 0);
+      const skipped   = reports.reduce((s, r) => s + (r.skippedQuestions  || 0), 0);
+      const totalQ    = answered + skipped;
+      const answerPct = totalQ > 0 ? Math.round((answered / totalQ) * 100) : 0;
+      const violations= reports.reduce((s, r) => s + (r.totalViolations || 0), 0);
+      const recommended = reports.filter(r => r.recommendation === 'RECOMMENDED').length;
+
+      document.getElementById('stat-cards').innerHTML = `
+        <div class="stat-card">
+          <div class="stat-card-icon">📊</div>
+          <div class="stat-card-label">Average Score</div>
+          <div class="stat-card-val">${avg.toFixed(1)}<span style="font-size:14px;color:var(--muted)">/10</span></div>
+          <div class="stat-card-sub">across ${reports.length} interviews</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-icon">🏆</div>
+          <div class="stat-card-label">Best Score</div>
+          <div class="stat-card-val">${best.toFixed(1)}<span style="font-size:14px;color:var(--muted)">/10</span></div>
+          <div class="stat-card-sub">${getOverallBand(best)} performance</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-icon">✅</div>
+          <div class="stat-card-label">Answer Rate</div>
+          <div class="stat-card-val">${answerPct}<span style="font-size:14px;color:var(--muted)">%</span></div>
+          <div class="stat-card-sub">${answered} answered / ${skipped} skipped</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-icon">⭐</div>
+          <div class="stat-card-label">Recommended</div>
+          <div class="stat-card-val">${recommended}<span style="font-size:14px;color:var(--muted)">/${reports.length}</span></div>
+          <div class="stat-card-sub">${violations} total violations</div>
+        </div>
+      `;
+    }
+
+    // ══════════════════════════════════════════
+    // CHARTS
+    // ══════════════════════════════════════════
+    function renderCharts(reports) {
+      const sorted = [...reports].reverse(); // oldest first for trend
+
+      // Chart defaults
+      Chart.defaults.color          = '#64748b';
+      Chart.defaults.font.family    = 'DM Mono';
+      Chart.defaults.font.size      = 11;
+      Chart.defaults.borderColor    = '#1e1e2e';
+
+      // 1. SCORE TREND LINE
+      const trendData = sorted.slice(-10);
+      new Chart(document.getElementById('chart-trend'), {
+        type: 'line',
+        data: {
+          labels: trendData.map((_, i) => `#${i + 1}`),
+          datasets: [{
+            label: 'Score',
+            data: trendData.map(r => r.overallScore || 0),
+            borderColor: '#6ee7b7',
+            backgroundColor: 'rgba(110,231,183,.08)',
+            borderWidth: 2,
+            pointBackgroundColor: '#6ee7b7',
+            pointRadius: 4,
+            fill: true,
+            tension: 0.4
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: {
+              min: 0, max: 10,
+              grid: { color: '#1e1e2e' },
+              ticks: { stepSize: 2 }
+            },
+            x: { grid: { color: '#1e1e2e' } }
+          }
+        }
+      });
+
+      // 2. TYPE DOUGHNUT
+      const hrCount   = reports.filter(r => r.interviewType === 'HR').length;
+      const techCount = reports.length - hrCount;
+      new Chart(document.getElementById('chart-type'), {
+        type: 'doughnut',
+        data: {
+          labels: ['HR', 'Technical'],
+          datasets: [{
+            data: [hrCount, techCount],
+            backgroundColor: ['rgba(129,140,248,.7)', 'rgba(110,231,183,.7)'],
+            borderColor: ['#818cf8', '#6ee7b7'],
+            borderWidth: 1.5,
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          cutout: '65%',
+          plugins: {
+            legend: { position: 'bottom', labels: { padding: 16 } }
+          }
+        }
+      });
+
+      // 3. RADAR — average parameter scores
+      const answered = reports.flatMap(r => r.questionBreakdown || []).filter(q => !q.wasSkipped);
+      const avg = key => answered.length
+        ? answered.reduce((s, q) => s + (q[key] || 0), 0) / answered.length
+        : 0;
+
+      new Chart(document.getElementById('chart-radar'), {
+        type: 'radar',
+        data: {
+          labels: ['Relevance', 'Concept', 'Clarity', 'Grammar', 'Completeness'],
+          datasets: [{
+            label: 'Avg Score',
+            data: [
+              avg('relevanceScore'), avg('conceptScore'),
+              avg('clarityScore'),   avg('grammarScore'),
+              avg('completenessScore')
+            ],
+            backgroundColor: 'rgba(110,231,183,.12)',
+            borderColor: '#6ee7b7',
+            borderWidth: 2,
+            pointBackgroundColor: '#6ee7b7',
+            pointRadius: 3,
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            r: {
+              min: 0, max: 10,
+              grid: { color: '#1e1e2e' },
+              ticks: { display: false },
+              pointLabels: { font: { size: 10 }, color: '#64748b' }
+            }
+          }
+        }
+      });
+
+      // 4. BAND BAR CHART
+      const bands = ['Excellent','Good','Average','Below Average','Poor'];
+      const bandCounts = bands.map(b => reports.filter(r => r.performanceBand === b).length);
+      new Chart(document.getElementById('chart-bands'), {
+        type: 'bar',
+        data: {
+          labels: bands,
+          datasets: [{
+            data: bandCounts,
+            backgroundColor: [
+              'rgba(34,197,94,.6)', 'rgba(129,140,248,.6)',
+              'rgba(251,191,36,.6)','rgba(248,113,113,.5)',
+              'rgba(248,113,113,.3)'
+            ],
+            borderColor: ['#22c55e','#818cf8','#fbbf24','#f87171','#f87171'],
+            borderWidth: 1.5, borderRadius: 6,
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { grid: { color: '#1e1e2e' }, ticks: { stepSize: 1 }, beginAtZero: true },
+            x: { grid: { color: '#1e1e2e' } }
+          }
+        }
+      });
+    }
+
+    // ══════════════════════════════════════════
+    // SKILL BARS
+    // ══════════════════════════════════════════
+    function renderSkillBars(reports) {
+      const answered = reports.flatMap(r => r.questionBreakdown || []).filter(q => !q.wasSkipped);
+      const avg = key => answered.length
+        ? (answered.reduce((s, q) => s + (q[key] || 0), 0) / answered.length)
+        : 0;
+
+      const params = [
+        { label:'Relevance',    key:'relevanceScore' },
+        { label:'Concept',      key:'conceptScore' },
+        { label:'Clarity',      key:'clarityScore' },
+        { label:'Grammar',      key:'grammarScore' },
+        { label:'Completeness', key:'completenessScore' },
+      ];
+
+      document.getElementById('skill-bars').innerHTML = params.map(p => {
+        const val = avg(p.key);
+        return `
+          <div class="skill-item">
+            <div class="skill-top">
+              <span class="skill-lbl">${p.label}</span>
+              <span class="skill-val">${val.toFixed(1)}/10</span>
+            </div>
+            <div class="skill-track">
+              <div class="skill-fill" style="width:${(val/10)*100}%"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ══════════════════════════════════════════
+    // ACTIVITY SUMMARY
+    // ══════════════════════════════════════════
+    function renderActivitySummary(reports) {
+      const totalQ     = reports.reduce((s, r) => s + (r.totalQuestions || 0), 0);
+      const answered   = reports.reduce((s, r) => s + (r.answeredQuestions || 0), 0);
+      const skipped    = reports.reduce((s, r) => s + (r.skippedQuestions || 0), 0);
+      const violations = reports.reduce((s, r) => s + (r.totalViolations || 0), 0);
+      const recommended= reports.filter(r => r.recommendation === 'RECOMMENDED').length;
+      const maybe      = reports.filter(r => r.recommendation === 'MAYBE').length;
+      const notRec     = reports.filter(r => r.recommendation === 'NOT_RECOMMENDED').length;
+
+      const rows = [
+        ['Total Questions Faced', totalQ],
+        ['Total Answers Given',   answered],
+        ['Total Skipped',         skipped],
+        ['Total Violations',      violations],
+        ['✅ Recommended',        recommended],
+        ['🤔 Maybe',              maybe],
+        ['❌ Not Recommended',    notRec],
+      ];
+
+      document.getElementById('activity-summary').innerHTML = rows.map(([label, val]) => `
+        <div style="display:flex;justify-content:space-between;align-items:center;
+             padding:10px 0;border-bottom:1px solid var(--border);font-size:12px">
+          <span style="color:var(--muted)">${label}</span>
+          <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px">${val}</span>
+        </div>
+      `).join('');
+    }
+
+    // ══════════════════════════════════════════
+    // HISTORY TABLE
+    // ══════════════════════════════════════════
+    function renderHistory(reports) {
+      if (!reports.length) {
+        document.getElementById('history-rows').innerHTML =
+          '<div class="empty"><div class="empty-icon">📋</div><p>No interviews yet.</p></div>';
+        return;
+      }
+
+      document.getElementById('history-rows').innerHTML = reports.map((r, i) => {
+        const date  = r.startTime
+          ? new Date(r.startTime).toLocaleDateString('en-IN', {day:'2-digit',month:'short',year:'numeric'})
+          : '—';
+        const type  = r.interviewType === 'TECHNICAL'
+          ? `Technical`
+          : 'HR';
+        const sub   = r.interviewType === 'TECHNICAL' && r.techStack
+          ? (r.techStack || []).slice(0,2).join(', ') + (r.techStack.length > 2 ? '...' : '')
+          : 'Behavioral & Soft Skills';
+        const band  = (r.performanceBand || 'Average').replace(' ', '-');
+
+        return `
+          <div class="history-row" onclick="viewReport('${r.sessionToken}')">
+            <div class="row-num">${i + 1}</div>
+            <div>
+              <div class="row-type">${type} Interview</div>
+              <div class="row-type-sub">${sub}</div>
+            </div>
+            <div class="row-score">${r.overallScore?.toFixed(1) ?? '—'}</div>
+            <div style="font-size:12px;color:var(--muted)">${r.answeredQuestions}/${r.totalQuestions}</div>
+            <div class="row-date">${date}</div>
+            <div><span class="band-pill ${band}">${r.performanceBand ?? '—'}</span></div>
+            <div class="row-action">→</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ══════════════════════════════════════════
+    // EMPTY STATE
+    // ══════════════════════════════════════════
+    function renderEmpty() {
+      document.getElementById('stat-cards').innerHTML = `
+        <div class="empty" style="grid-column:1/-1">
+          <div class="empty-icon">🎯</div>
+          <p>No interviews yet.<br/>Start your first interview to see your profile stats here.</p>
+          <a href="setup.html" style="display:inline-block;margin-top:16px;padding:10px 24px;
+             background:var(--accent);color:#050508;border-radius:8px;
+             font-family:'Syne',sans-serif;font-weight:700;font-size:13px;text-decoration:none">
+            Start Interview →
+          </a>
+        </div>
+      `;
+      document.getElementById('history-rows').innerHTML =
+        '<div class="empty"><p>Complete an interview to see history.</p></div>';
+    }
+
+    // ══════════════════════════════════════════
+    // HELPERS
+    // ══════════════════════════════════════════
+    function getOverallBand(score) {
+      if (score >= 8) return 'Excellent';
+      if (score >= 6) return 'Good';
+      if (score >= 4) return 'Average';
+      return 'Poor';
+    }
+
+    function viewReport(sessionToken) {
+      window.location.href = `evaluation.html?session=${sessionToken}`;
+    }
+
+    function logout() {
+      localStorage.clear();
+      window.location.href = 'auth.html';
+    }
+
+    function showToast(msg, type = 'success') {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = `toast ${type} show`;
+      setTimeout(() => t.classList.remove('show'), 3500);
+    }
+
+    // ── INIT ──
+    loadAll();
+</script>
+</body>
+</html>
