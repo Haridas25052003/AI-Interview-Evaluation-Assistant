@@ -19,37 +19,80 @@ public class AnalysisService {
     private final AnalysisResultRepository analysisResultRepository;
     private final ObjectMapper objectMapper;
 
-    // analyzes a single answer and saves the result
     public AnalysisResult analyzeAnswer(InterviewQuestionHistory questionHistory) {
 
-        // if skipped — return zero scores immediately without calling GPT
         if (questionHistory.isWasSkipped()) {
             return saveSkippedAnalysis(questionHistory);
         }
 
         String systemPrompt = """
-            You are an expert interview evaluator. Analyze the candidate's answer
-            and return a JSON object with exactly these fields (scores from 0 to 10):
+            You are a fair and encouraging interview evaluator at a reputed tech company.
+            Your job is to evaluate a candidate's spoken interview answer.
+
+            IMPORTANT CONTEXT:
+            - The candidate's answer was captured via Speech-to-Text technology.
+            - Speech-to-Text may introduce minor errors like missing punctuation,
+              small word mismatches, or filler words like "um", "uh", "like".
+            - Do NOT penalize for these speech transcription artifacts.
+            - Evaluate the MEANING and CONTENT of the answer, not the writing style.
+            - Be fair and generous — if the candidate clearly understands the concept,
+              reward them appropriately.
+
+            SCORING GUIDE (use this strictly):
+            9-10 → Excellent: answer is accurate, complete, and well explained
+            7-8  → Good: answer is mostly correct with minor gaps
+            5-6  → Average: answer shows basic understanding but lacks depth
+            3-4  → Below average: partial understanding, missing key points
+            1-2  → Poor: mostly incorrect or very vague
+            0    → No answer or completely irrelevant
+
+            PARAMETER DEFINITIONS:
+            - relevanceScore: Did the answer directly address the question asked? (9-10 if on-topic)
+            - conceptScore: Does the candidate understand the underlying concept correctly?
+            - clarityScore: Is the core idea of the answer understandable and clear?
+              NOTE: Ignore filler words, missing punctuation — focus on whether the meaning is clear.
+            - grammarScore: Evaluate SPOKEN grammar only — ignore missing commas, periods, capitalization.
+              Give 8-10 if the spoken sentences make grammatical sense even if transcription looks rough.
+              Only penalize if the sentence structure itself is broken or incomprehensible.
+            - completenessScore: Does the answer cover the main points needed to answer the question?
+              A 2-3 line answer that covers the key point should score 7-8, not 3-4.
+
+            CRITICAL RULES:
+            - Never give below 5 for grammarScore just because the text has no punctuation.
+            - Never give below 6 for clarityScore if the answer meaning is understandable.
+            - If the candidate gives a correct and relevant answer, overall score must be 7 or above.
+            - overallScore must be the weighted average:
+              (relevanceScore * 0.25) + (conceptScore * 0.30) + (clarityScore * 0.20)
+              + (grammarScore * 0.10) + (completenessScore * 0.15)
+            - feedbackSummary must be one encouraging sentence mentioning what was good
+              and one specific thing to improve.
+
+            Return ONLY this JSON — no explanation, no markdown, no extra text:
             {
-              "relevanceScore": <int>,
-              "conceptScore": <int>,
-              "clarityScore": <int>,
-              "grammarScore": <int>,
-              "completenessScore": <int>,
-              "overallScore": <double>,
-              "feedbackSummary": "<one sentence feedback>"
+              "relevanceScore": <int 0-10>,
+              "conceptScore": <int 0-10>,
+              "clarityScore": <int 0-10>,
+              "grammarScore": <int 0-10>,
+              "completenessScore": <int 0-10>,
+              "overallScore": <double 0.0-10.0>,
+              "feedbackSummary": "<one encouraging sentence with one improvement tip>"
             }
-            Return only valid JSON. No explanation, no markdown, no extra text.
             """;
 
         String userPrompt = String.format("""
-            Question: %s
-            Candidate's Answer: %s
-            
-            Evaluate this answer and return the JSON scores.
+            Interview Question:
+            "%s"
+
+            Candidate's Spoken Answer (captured via Speech-to-Text):
+            "%s"
+
+            Evaluate this answer fairly using the scoring guide above.
+            Remember this is spoken English captured by STT — be lenient on grammar and punctuation.
+            If the answer is conceptually correct, score it 7 or above.
+            Return only the JSON.
             """,
-            questionHistory.getQuestionText(),
-            questionHistory.getUserAnswer()
+                questionHistory.getQuestionText(),
+                questionHistory.getUserAnswer()
         );
 
         try {
@@ -76,13 +119,11 @@ public class AnalysisService {
         }
     }
 
-    // compute final score for entire session (average of all non-skipped answers)
     public double computeFinalScore(Long sessionId) {
         Double avg = analysisResultRepository.computeAverageScoreBySessionId(sessionId);
         return avg != null ? Math.round(avg * 100.0) / 100.0 : 0.0;
     }
 
-    // save zero-score analysis for skipped questions
     private AnalysisResult saveSkippedAnalysis(InterviewQuestionHistory questionHistory) {
         AnalysisResult result = AnalysisResult.builder()
                 .relevanceScore(0)
