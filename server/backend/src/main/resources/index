@@ -31,6 +31,7 @@
           overflow: hidden;
         }
 
+        /* ── NAV ── */
         nav {
           display: flex;
           align-items: center;
@@ -52,6 +53,7 @@
         }
         .nav-center { display:flex; align-items:center; gap:24px; }
 
+        /* live indicator */
         .live-badge {
           display:flex; align-items:center; gap:8px;
           font-size:11px; color:var(--error); letter-spacing:2px; text-transform:uppercase;
@@ -66,6 +68,7 @@
         }
         @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.3)} }
 
+        /* timer */
         .timer {
           font-family:'Syne',sans-serif;
           font-size:16px;
@@ -77,6 +80,17 @@
           border-radius: 20px;
         }
 
+        /* violation counter */
+        .violations {
+          font-size:11px; color:var(--warn);
+          display:flex; align-items:center; gap:6px;
+          background: rgba(251,191,36,.1);
+          padding: 6px 14px;
+          border-radius: 20px;
+          border: 1px solid rgba(251,191,36,.2);
+        }
+
+        /* question progress */
         .progress-info {
           font-size:12px;
           color:var(--muted);
@@ -86,6 +100,7 @@
         }
         .progress-info span { color:var(--accent); font-weight:700; }
 
+        /* ── MAIN LAYOUT ── */
         .layout {
           flex:1; display:grid;
           grid-template-columns: 1fr 420px;
@@ -93,6 +108,7 @@
           overflow: hidden;
         }
 
+        /* ── LEFT: INTERVIEW AREA ── */
         .interview-area {
           display:flex; flex-direction:column;
           padding:32px 40px;
@@ -101,6 +117,7 @@
           background: linear-gradient(135deg, var(--bg) 0%, rgba(13,13,20,.8) 100%);
         }
 
+        /* progress bar */
         .progress-bar-wrap {
           height:4px;
           background: var(--border);
@@ -117,6 +134,7 @@
           box-shadow: 0 0 20px rgba(110,231,183,.3);
         }
 
+        /* question card - ENHANCED */
         .question-card {
           background: linear-gradient(135deg, rgba(13,13,20,.9), rgba(20,20,35,.9));
           border:1px solid var(--border);
@@ -144,6 +162,13 @@
           height: 2px;
           background: linear-gradient(90deg, var(--accent), var(--accent2));
           opacity: 0.6;
+        }
+        .question-card:hover {
+          border-color: rgba(110,231,183,.2);
+          box-shadow:
+            0 8px 30px rgba(0,0,0,.4),
+            0 1px 5px rgba(110,231,183,.1),
+            inset 0 1px 1px rgba(255,255,255,.03);
         }
         .question-label {
           font-size:11px;
@@ -189,6 +214,7 @@
           z-index: 1;
         }
 
+        /* speaking animation */
         .speaking-waves {
           display:none;
           align-items:center;
@@ -215,6 +241,7 @@
           0%,100%{transform:scaleY(1)} 50%{transform:scaleY(1.8)}
         }
 
+        /* answer area - ENHANCED */
         .answer-card {
           background: linear-gradient(135deg, rgba(13,13,20,.9), rgba(18,18,30,.9));
           border:1px solid var(--border);
@@ -229,6 +256,18 @@
             inset 0 1px 1px rgba(255,255,255,.02);
           transition: all .3s ease;
         }
+        .answer-card::after {
+          content: '';
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(110,231,183,.1), transparent);
+        }
+        .answer-card:hover {
+          border-color: rgba(110,231,183,.15);
+        }
         .answer-label {
           font-size:11px;
           letter-spacing:3px;
@@ -242,6 +281,7 @@
           border-bottom: 1px solid rgba(30,30,46,.5);
         }
 
+        /* mic status - ENHANCED */
         .mic-status {
           display:flex;
           align-items:center;
@@ -268,24 +308,14 @@
           background:var(--accent);
           box-shadow: 0 0 15px rgba(110,231,183,.5);
         }
-        .mic-dot.speaking {
-          background:var(--accent2);
-          box-shadow: 0 0 15px rgba(129,140,248,.5);
-        }
 
         .answer-text {
-          font-size:15px;
+          font-size:14px;
           color:var(--text);
           line-height:1.8;
-          min-height:120px;
+          min-height:100px;
           white-space:pre-wrap;
-          word-break: break-word;
-          padding: 16px;
-          background: rgba(0,0,0,.2);
-          border-radius: 10px;
-          border: 1px solid rgba(30,30,46,.3);
-          overflow-y: auto;
-          max-height: 200px;
+          padding: 8px 0;
         }
         .answer-placeholder {
           color:var(--muted);
@@ -293,6 +323,7 @@
           opacity: 0.7;
         }
 
+        /* audio visualizer */
         .visualizer {
           display:flex;
           align-items:flex-end;
@@ -311,6 +342,7 @@
           min-height: 3px;
         }
 
+        /* action buttons - ENHANCED */
         .actions {
           display:flex;
           gap:14px;
@@ -328,6 +360,22 @@
           letter-spacing: 0.5px;
           position: relative;
           overflow: hidden;
+        }
+        .btn::before {
+          content: '';
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          width: 0;
+          height: 0;
+          border-radius: 50%;
+          background: rgba(255,255,255,.1);
+          transition: all .5s ease;
+          transform: translate(-50%, -50%);
+        }
+        .btn:hover::before {
+          width: 300px;
+          height: 300px;
         }
         .btn-primary {
           background: linear-gradient(135deg, var(--accent), #5dd4a0);
@@ -372,6 +420,7 @@
           transform: translateY(-2px);
         }
 
+        /* analysis result */
         .analysis-card {
           background: linear-gradient(135deg, rgba(13,13,20,.9), rgba(20,20,35,.9));
           border:1px solid var(--border);
@@ -429,6 +478,7 @@
           border-radius: 8px;
         }
 
+        /* ── RIGHT: CAMERA PANEL - ENHANCED ── */
         .camera-panel {
           background: linear-gradient(135deg, rgba(8,8,18,.95), rgba(13,13,20,.95));
           border-left:1px solid var(--border);
@@ -449,12 +499,18 @@
           box-shadow:
             0 8px 30px rgba(0,0,0,.5),
             0 0 0 1px rgba(110,231,183,.1);
+          transition: all .3s ease;
+        }
+        .camera-wrap:hover {
+          box-shadow:
+            0 12px 40px rgba(0,0,0,.6),
+            0 0 0 1px rgba(110,231,183,.2);
         }
         video {
           width:100%;
           height:100%;
           object-fit:cover;
-          transform:scaleX(-1);
+          transform:scaleX(-1); /* mirror */
         }
         .camera-overlay {
           position:absolute;
@@ -474,6 +530,14 @@
           border-radius: 50%;
           background: var(--accent);
           box-shadow: 0 0 15px var(--accent);
+        }
+        .camera-overlay.violation {
+          border-color:var(--error);
+          box-shadow: inset 0 0 30px rgba(248,113,113,.2);
+        }
+        .camera-overlay.violation::before {
+          background: var(--error);
+          box-shadow: 0 0 15px var(--error);
         }
         .camera-overlay.ok {
           border-color:rgba(110,231,183,.4);
@@ -495,6 +559,7 @@
           border: 1px solid rgba(255,255,255,.1);
         }
 
+        /* proctor log - ENHANCED */
         .proctor-section {
           flex: 1;
           display: flex;
@@ -516,8 +581,9 @@
           content: '';
           width: 4px;
           height: 4px;
-          background: var(--accent);
+          background: var(--warn);
           border-radius: 50%;
+          animation: pulse 2s infinite;
         }
         .proctor-log {
           display:flex;
@@ -526,6 +592,44 @@
           max-height:300px;
           overflow-y:auto;
           padding-right: 4px;
+        }
+        .proctor-log::-webkit-scrollbar {
+          width: 4px;
+        }
+        .proctor-log::-webkit-scrollbar-track {
+          background: rgba(30,30,46,.3);
+          border-radius: 4px;
+        }
+        .proctor-log::-webkit-scrollbar-thumb {
+          background: var(--border);
+          border-radius: 4px;
+        }
+        .proctor-item {
+          font-size:11px;
+          color:var(--warn);
+          background:rgba(251,191,36,.08);
+          border:1px solid rgba(251,191,36,.2);
+          border-radius:10px;
+          padding:10px 14px;
+          display:flex;
+          gap:10px;
+          align-items:flex-start;
+          transition: all .2s ease;
+          animation: slideIn .3s ease;
+        }
+        @keyframes slideIn {
+          from { opacity: 0; transform: translateX(10px); }
+          to { opacity: 1; transform: translateX(0); }
+        }
+        .proctor-item:hover {
+          background: rgba(251,191,36,.12);
+          border-color: rgba(251,191,36,.3);
+        }
+        .proctor-time {
+          color:var(--muted);
+          flex-shrink:0;
+          font-size: 10px;
+          min-width: 70px;
         }
         .no-violations {
           font-size:12px;
@@ -537,6 +641,7 @@
           border: 1px dashed rgba(110,231,183,.1);
         }
 
+        /* overlay screens */
         .overlay {
           position:fixed;
           inset:0;
@@ -598,6 +703,7 @@
           to  {opacity:1;transform:translateY(0)}
         }
 
+        /* toast */
         .toast {
           position:fixed;
           bottom:32px;
@@ -617,6 +723,12 @@
           transform:translateX(-50%) translateY(0);
           opacity:1;
         }
+        .toast.warn {
+          background:rgba(251,191,36,.15);
+          border:1px solid var(--warn);
+          color:var(--warn);
+          box-shadow: 0 4px 15px rgba(251,191,36,.2);
+        }
         .toast.info {
           background:rgba(110,231,183,.12);
           border:1px solid var(--accent);
@@ -624,6 +736,7 @@
           box-shadow: 0 4px 15px rgba(110,231,183,.2);
         }
 
+        /* Responsive adjustments */
         @media (max-width: 968px) {
           .layout {
             grid-template-columns: 1fr;
@@ -637,13 +750,15 @@
 </head>
 <body>
 
+<!-- Permission overlay -->
 <div class="overlay" id="permission-overlay">
     <div class="overlay-icon">🎙️</div>
     <div class="overlay-title">Camera & Microphone Access</div>
-    <div class="overlay-sub">We need access to your camera and microphone to conduct the interview.</div>
+    <div class="overlay-sub">We need access to your camera and microphone to conduct the interview. Your session will be proctored.</div>
     <button class="overlay-btn" onclick="requestPermissions()">Allow & Start Interview</button>
 </div>
 
+<!-- ── NAV ── -->
 <nav>
     <div class="nav-brand">AI Interviewer</div>
     <div class="nav-center">
@@ -651,16 +766,23 @@
         <div class="timer" id="timer">00:00</div>
     </div>
     <div style="display:flex;align-items:center;gap:16px">
+        <div class="violations" id="violation-badge">⚠️ <span id="violation-count">0</span> violations</div>
         <div class="progress-info">Q <span id="current-q">0</span> / <span id="total-q">—</span></div>
     </div>
 </nav>
 
+<!-- ── LAYOUT ── -->
 <div class="layout">
+
+    <!-- LEFT -->
     <div class="interview-area">
+
+        <!-- Progress bar -->
         <div class="progress-bar-wrap">
             <div class="progress-bar-fill" id="progress-fill"></div>
         </div>
 
+        <!-- Question card -->
         <div class="question-card">
             <div class="question-label">
                 <span id="q-label">// Question</span>
@@ -673,6 +795,7 @@
             </div>
         </div>
 
+        <!-- Answer area -->
         <div class="answer-card">
             <div class="answer-label">
                 <span>// Your Answer (Speech to Text)</span>
@@ -684,9 +807,12 @@
             <div class="answer-text" id="answer-text">
                 <span class="answer-placeholder">Your spoken answer will appear here...</span>
             </div>
-            <div class="visualizer" id="visualizer"></div>
+            <div class="visualizer" id="visualizer">
+                <!-- bars generated by JS -->
+            </div>
         </div>
 
+        <!-- Analysis result (shown after each answer) -->
         <div class="analysis-card" id="analysis-card">
             <div class="analysis-title">// Answer Analysis</div>
             <div class="score-grid">
@@ -699,35 +825,42 @@
             <div class="feedback-text" id="feedback-text"></div>
         </div>
 
+        <!-- Action buttons -->
         <div class="actions">
             <button class="btn btn-secondary" id="skip-btn" onclick="skipQuestion()" disabled>Skip Question</button>
             <button class="btn btn-primary"   id="submit-btn" onclick="submitAnswer()" disabled>Submit Answer</button>
             <button class="btn btn-danger"    onclick="confirmEnd()">End</button>
         </div>
+
     </div>
 
+    <!-- RIGHT: CAMERA -->
     <div class="camera-panel">
+
         <div class="camera-wrap">
             <video id="camera-feed" autoplay muted playsinline></video>
-            <div class="camera-overlay ok" id="camera-overlay"></div>
+            <div class="camera-overlay" id="camera-overlay"></div>
             <div class="camera-status">
                 <div class="live-dot" style="width:6px;height:6px"></div>
                 <span>Camera On</span>
             </div>
         </div>
 
+        <!-- Proctor log -->
         <div class="proctor-section">
-            <div class="proctor-title">// Session Status</div>
+            <div class="proctor-title">// Proctor Log</div>
             <div class="proctor-log" id="proctor-log">
-                <div class="no-violations">✨ Session active - All clear</div>
+                <div class="no-violations">No violations detected</div>
             </div>
         </div>
+
     </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
+    // All existing JavaScript remains unchanged
     // ═══════════════════════════════════════════════
     // CONFIG
     // ═══════════════════════════════════════════════
@@ -745,33 +878,27 @@
     let ws               = null;
     let currentQuestion  = null;
     let currentAnswer    = '';
+    let violationCount   = 0;
     let timerInterval    = null;
     let elapsedSeconds   = 0;
     let mediaStream      = null;
     let recognition      = null;
     let isListening      = false;
-    let isAISpeaking     = false; // Track if AI is speaking
     let silenceTimer     = null;
-    const SILENCE_MS     = 4000;
+    const SILENCE_MS     = 4000; // auto-submit after 4s silence
 
     // ═══════════════════════════════════════════════
     // 1. PERMISSIONS
     // ═══════════════════════════════════════════════
     async function requestPermissions() {
       try {
-        mediaStream = await navigator.mediaDevices.getUserMedia({
-          video: { width: 640, height: 480, facingMode: "user" },
-          audio: {
-            echoCancellation: true,
-            noiseSuppression: true,
-            autoGainControl: true
-          }
-        });
+        mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
         document.getElementById('camera-feed').srcObject = mediaStream;
         document.getElementById('permission-overlay').style.display = 'none';
         document.getElementById('camera-overlay').classList.add('ok');
         initWebSocket();
         startTimer();
+        setupProctoring();
         setupSpeechRecognition();
         setupVisualizer();
       } catch (e) {
@@ -793,12 +920,12 @@
           case 'QUESTION': handleQuestion(msg.payload); break;
           case 'ANALYSIS': handleAnalysis(msg.payload); break;
           case 'INTERVIEW_END': handleInterviewEnd(msg.payload); break;
-          case 'ERROR': showToast(msg.payload, 'info'); break;
+          case 'ERROR': showToast(msg.payload, 'warn'); break;
         }
       };
 
       ws.onclose = () => console.log('WebSocket closed');
-      ws.onerror = (e) => showToast('Connection error', 'info');
+      ws.onerror = (e) => showToast('Connection error', 'warn');
     }
 
     function sendWsMessage(type, payload) {
@@ -808,252 +935,129 @@
     }
 
     // ═══════════════════════════════════════════════
-    // 3. HANDLE QUESTION
+    // 3. HANDLE QUESTION (from server)
     // ═══════════════════════════════════════════════
     function handleQuestion(payload) {
-      // CRITICAL: Stop listening before AI speaks
-      stopListening();
-      isAISpeaking = true;
-
       currentQuestion = payload;
       currentAnswer   = '';
 
+      // update UI
       document.getElementById('question-text').textContent = payload.questionText;
       document.getElementById('q-label').textContent       = `// Question ${payload.questionNumber}`;
       document.getElementById('current-q').textContent     = payload.questionNumber;
       document.getElementById('followup-badge').style.display = payload.isFollowUp ? 'inline' : 'none';
 
+      // progress bar
       const pct = ((payload.questionNumber - 1) / totalQ) * 100;
       document.getElementById('progress-fill').style.width = pct + '%';
 
+      // reset answer display
       document.getElementById('answer-text').innerHTML =
         '<span class="answer-placeholder">Your spoken answer will appear here...</span>';
 
+      // hide previous analysis
       document.getElementById('analysis-card').classList.remove('show');
 
+      // enable buttons
       document.getElementById('skip-btn').disabled   = false;
       document.getElementById('submit-btn').disabled = false;
 
-      updateSessionStatus(`Question ${payload.questionNumber} of ${totalQ}`);
-
-      // Speak the question (will start recognition after speaking)
+      // speak the question via TTS
       speakQuestion(payload.questionText);
     }
 
     // ═══════════════════════════════════════════════
-    // 4. TEXT TO SPEECH (TTS) - FIXED
+    // 4. TEXT TO SPEECH (TTS)
     // ═══════════════════════════════════════════════
     function speakQuestion(text) {
-      // Cancel any ongoing speech and recognition
       window.speechSynthesis.cancel();
-      stopListening();
-      isAISpeaking = true;
-
       const waves = document.getElementById('speaking-waves');
       waves.classList.add('active');
-      setMicStatus('speaking', 'AI Speaking... (mic off)');
+      setMicStatus('waiting', 'AI Speaking...');
 
       const utt = new SpeechSynthesisUtterance(text);
-      utt.rate  = 0.9;
+      utt.rate  = 0.92;
       utt.pitch = 1;
       utt.lang  = 'en-US';
 
+      // pick a natural voice if available
       const voices = window.speechSynthesis.getVoices();
-      const preferred = voices.find(v =>
-        v.name.includes('Google') ||
-        v.name.includes('Natural') ||
-        v.name.includes('Samantha')
-      );
+      const preferred = voices.find(v => v.name.includes('Google') || v.name.includes('Natural'));
       if (preferred) utt.voice = preferred;
 
-      // CRITICAL: Only start listening AFTER speech ends
-      utt.onstart = () => {
-        console.log('TTS started - recognition stopped');
-        stopListening();
-      };
-
       utt.onend = () => {
-        console.log('TTS ended - starting recognition');
         waves.classList.remove('active');
-        isAISpeaking = false;
-        setMicStatus('ready', 'Speak now...');
-
-        // Small delay to ensure TTS audio is fully done
-        setTimeout(() => {
-          startListening();
-        }, 300);
-      };
-
-      utt.onerror = (e) => {
-        console.error('TTS error:', e);
-        waves.classList.remove('active');
-        isAISpeaking = false;
-        setMicStatus('ready', 'Speak now...');
-        setTimeout(() => {
-          startListening();
-        }, 300);
+        startListening(); // start STT after TTS finishes
       };
 
       window.speechSynthesis.speak(utt);
     }
 
     // ═══════════════════════════════════════════════
-    // 5. IMPROVED SPEECH TO TEXT (STT)
+    // 5. SPEECH TO TEXT (STT)
     // ═══════════════════════════════════════════════
     function setupSpeechRecognition() {
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SR) {
-        showToast('Speech recognition not supported', 'info');
-        return;
-      }
+      if (!SR) { showToast('Speech recognition not supported in this browser', 'warn'); return; }
 
       recognition = new SR();
       recognition.continuous    = true;
       recognition.interimResults = true;
       recognition.lang          = 'en-US';
-      recognition.maxAlternatives = 3;
 
       recognition.onresult = (event) => {
-        // IGNORE results if AI is speaking
-        if (isAISpeaking) {
-          console.log('Ignoring speech - AI is speaking');
-          return;
-        }
-
         let interim = '';
         let final   = '';
-
         for (let i = event.resultIndex; i < event.results.length; i++) {
-          // Get best alternative based on confidence
-          let bestTranscript = '';
-          let bestConfidence = 0;
-
-          for (let j = 0; j < event.results[i].length; j++) {
-            if (event.results[i][j].confidence > bestConfidence) {
-              bestConfidence = event.results[i][j].confidence;
-              bestTranscript = event.results[i][j].transcript;
-            }
-          }
-
-          if (!bestTranscript) {
-            bestTranscript = event.results[i][0].transcript;
-          }
-
-          if (event.results[i].isFinal) {
-            final += bestTranscript + ' ';
-          } else {
-            interim += bestTranscript;
-          }
+          const t = event.results[i][0].transcript;
+          if (event.results[i].isFinal) final += t;
+          else interim += t;
         }
+        if (final) currentAnswer += final;
 
-        if (final) {
-          currentAnswer += final;
-        }
+        const display = currentAnswer + (interim ? ' ' + interim : '');
+        document.getElementById('answer-text').textContent = display || ' ';
 
-        const display = (currentAnswer + ' ' + interim).trim();
-        const cleanDisplay = cleanTranscript(display);
-
-        if (cleanDisplay) {
-          document.getElementById('answer-text').textContent = cleanDisplay;
-        }
-
+        // reset silence timer on every speech event
         resetSilenceTimer();
       };
 
       recognition.onstart = () => {
         isListening = true;
-        if (!isAISpeaking) {
-          setMicStatus('listening', 'Listening...');
-        }
+        setMicStatus('listening', 'Listening...');
       };
 
       recognition.onend = () => {
         isListening = false;
-
-        // Auto-restart only if not AI speaking and question is active
-        if (!isAISpeaking && currentQuestion) {
-          setMicStatus('ready', 'Ready');
-
-          // Restart after brief delay
-          setTimeout(() => {
-            if (!isAISpeaking && currentQuestion && !isListening) {
-              try {
-                recognition.start();
-                console.log('Recognition restarted');
-              } catch(e) {
-                console.log('Restart failed, will retry');
-              }
-            }
-          }, 500);
-        }
+        if (currentQuestion) setMicStatus('ready', 'Ready');
       };
 
       recognition.onerror = (e) => {
-        console.log('Recognition error:', e.error);
-
-        if (isAISpeaking) return; // Ignore errors during AI speech
-
-        if (e.error === 'no-speech') {
-          // Normal, ignore
-        } else if (e.error === 'aborted') {
-          // Often happens during TTS, ignore
-        } else {
-          // Attempt restart for other errors
-          setTimeout(() => {
-            if (!isAISpeaking && currentQuestion && !isListening) {
-              try {
-                recognition.start();
-              } catch(ex) {}
-            }
-          }, 1000);
-        }
+        if (e.error !== 'no-speech') showToast('Mic error: ' + e.error, 'warn');
       };
     }
 
-    function cleanTranscript(text) {
-      if (!text) return '';
-
-      return text
-        .replace(/\s+/g, ' ')
-        .replace(/\s+([.,!?;:])/g, '$1')
-        .replace(/^[\s.,!?;:]+/, '')
-        .replace(/\s+/g, ' ')
-        .trim();
-    }
-
     function startListening() {
-      if (!recognition || isAISpeaking) return;
-
+      if (!recognition) return;
       try {
-        if (!isListening) {
-          recognition.start();
-          console.log('Recognition started');
-        }
+        recognition.start();
         resetSilenceTimer();
         setMicStatus('listening', 'Listening...');
-      } catch (e) {
-        console.log('Recognition already active');
-      }
+      } catch (e) { /* already running */ }
     }
 
     function stopListening() {
-      if (recognition) {
-        try {
-          recognition.stop();
-          console.log('Recognition stopped');
-        } catch(e) {
-          // Already stopped
-        }
-      }
+      if (recognition) recognition.stop();
       clearTimeout(silenceTimer);
-      isListening = false;
+      setMicStatus('ready', 'Ready');
     }
 
+    // auto-submit after silence
     function resetSilenceTimer() {
       clearTimeout(silenceTimer);
       silenceTimer = setTimeout(() => {
-        if (currentAnswer.trim().length > 0 && !isAISpeaking) {
-          showToast('Silence detected — auto-submitting', 'info');
+        if (currentAnswer.trim().length > 0) {
+          showToast('Silence detected — submitting answer', 'info');
           submitAnswer();
         }
       }, SILENCE_MS);
@@ -1069,16 +1073,13 @@
     // 6. SUBMIT / SKIP
     // ═══════════════════════════════════════════════
     function submitAnswer() {
-      if (!currentQuestion || isAISpeaking) return;
-
+      if (!currentQuestion) return;
       stopListening();
       disableButtons();
 
-      const cleanAnswer = cleanTranscript(currentAnswer);
-
       sendWsMessage('ANSWER', {
         questionNumber: currentQuestion.questionNumber,
-        answerText:     cleanAnswer,
+        answerText:     currentAnswer.trim(),
         skipped:        false
       });
 
@@ -1087,7 +1088,6 @@
 
     function skipQuestion() {
       if (!currentQuestion) return;
-
       stopListening();
       disableButtons();
 
@@ -1106,15 +1106,15 @@
     }
 
     // ═══════════════════════════════════════════════
-    // 7. HANDLE ANALYSIS
+    // 7. HANDLE ANALYSIS (from server)
     // ═══════════════════════════════════════════════
     function handleAnalysis(payload) {
-      document.getElementById('sc-rel').textContent = payload.relevanceScore || '—';
-      document.getElementById('sc-con').textContent = payload.conceptScore || '—';
-      document.getElementById('sc-cla').textContent = payload.clarityScore || '—';
-      document.getElementById('sc-gra').textContent = payload.grammarScore || '—';
-      document.getElementById('sc-com').textContent = payload.completenessScore || '—';
-      document.getElementById('feedback-text').textContent = payload.feedbackSummary || 'Analysis received';
+      document.getElementById('sc-rel').textContent = payload.relevanceScore;
+      document.getElementById('sc-con').textContent = payload.conceptScore;
+      document.getElementById('sc-cla').textContent = payload.clarityScore;
+      document.getElementById('sc-gra').textContent = payload.grammarScore;
+      document.getElementById('sc-com').textContent = payload.completenessScore;
+      document.getElementById('feedback-text').textContent = payload.feedbackSummary;
       document.getElementById('analysis-card').classList.add('show');
     }
 
@@ -1122,87 +1122,67 @@
     // 8. INTERVIEW END
     // ═══════════════════════════════════════════════
     async function handleInterviewEnd(payload) {
-      isAISpeaking = false;
       stopListening();
       clearInterval(timerInterval);
       window.speechSynthesis.cancel();
 
       showToast('Interview complete! Generating report...', 'info');
 
+      // generate evaluation report
       try {
-        const response = await fetch(`http://localhost:8080/api/evaluation/generate/${sessionToken}`, {
+        await fetch(`http://localhost:8080/api/evaluation/generate/${sessionToken}`, {
           method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Content-Type': 'application/json'
-          }
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
+      } catch (e) { console.error('Report generation failed', e); }
 
-        // Poll for report
-        await pollForReport(sessionToken);
-      } catch (e) {
-        showToast('Redirecting to evaluation...', 'info');
-        setTimeout(() => {
-          window.location.href = `evaluation.html?session=${sessionToken}`;
-        }, 3000);
-      }
-    }
-
-    async function pollForReport(sessionToken, maxAttempts = 15, delayMs = 2000) {
-      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-        try {
-          const response = await fetch(`http://localhost:8080/api/evaluation/report/${sessionToken}`, {
-            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-          });
-
-          if (response.ok) {
-            window.location.href = `evaluation.html?session=${sessionToken}`;
-            return;
-          }
-        } catch (e) {}
-
-        await new Promise(resolve => setTimeout(resolve, delayMs));
-      }
-
-      setTimeout(() => {
-        window.location.href = `evaluation.html?session=${sessionToken}`;
-      }, 2000);
+      setTimeout(() => window.location.href = `evaluation.html?session=${sessionToken}`, 2000);
     }
 
     function confirmEnd() {
-      if (confirm('End this interview early?')) {
+      if (confirm('Are you sure you want to end the interview early?')) {
         handleInterviewEnd({ sessionToken });
       }
     }
 
     // ═══════════════════════════════════════════════
-    // 9. SESSION STATUS
+    // 9. PROCTORING
     // ═══════════════════════════════════════════════
-    function updateSessionStatus(message) {
-      const log = document.getElementById('proctor-log');
+    function setupProctoring() {
+      // tab visibility change detection
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+          logViolation('TAB_SWITCH', 'Candidate switched away from the interview tab');
+        }
+      });
+
+      // window blur (switched to another app)
+      window.addEventListener('blur', () => {
+        logViolation('WINDOW_BLUR', 'Candidate left the interview window');
+      });
+    }
+
+    function logViolation(type, details) {
+      violationCount++;
+      document.getElementById('violation-count').textContent = violationCount;
+      document.getElementById('camera-overlay').classList.add('violation');
+      setTimeout(() => document.getElementById('camera-overlay').classList.remove('violation'), 2000);
+
+      // send to server via WebSocket
+      sendWsMessage('PROCTOR_EVENT', { violationType: type, details });
+
+      // add to log UI
+      const log  = document.getElementById('proctor-log');
+      const item = document.createElement('div');
+      item.className = 'proctor-item';
+      const now  = new Date().toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+      item.innerHTML = `<span class="proctor-time">${now}</span><span>${type.replace('_',' ')}: ${details}</span>`;
+
       const noViol = log.querySelector('.no-violations');
       if (noViol) noViol.remove();
-
-      const items = log.querySelectorAll('.status-item');
-      if (items.length >= 5) {
-        items[items.length - 1].remove();
-      }
-
-      const item = document.createElement('div');
-      item.className = 'status-item';
-      const now = new Date().toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
-      item.style.cssText = `
-        font-size: 11px;
-        color: var(--muted);
-        background: rgba(110,231,183,.05);
-        border: 1px solid rgba(110,231,183,.1);
-        border-radius: 10px;
-        padding: 10px 14px;
-        transition: all .2s ease;
-        animation: fadeUp .3s ease;
-      `;
-      item.innerHTML = `<span style="color: var(--accent); margin-right: 8px;">${now}</span>${message}`;
       log.prepend(item);
+
+      showToast(`⚠️ Violation: ${type.replace('_', ' ')}`, 'warn');
     }
 
     // ═══════════════════════════════════════════════
@@ -1210,8 +1190,7 @@
     // ═══════════════════════════════════════════════
     function setupVisualizer() {
       const vizEl = document.getElementById('visualizer');
-      const BAR_COUNT = 32;
-      vizEl.innerHTML = '';
+      const BAR_COUNT = 28;
       for (let i = 0; i < BAR_COUNT; i++) {
         const bar = document.createElement('div');
         bar.className = 'viz-bar';
@@ -1223,8 +1202,7 @@
         const ctx      = new AudioContext();
         const source   = ctx.createMediaStreamSource(mediaStream);
         const analyser = ctx.createAnalyser();
-        analyser.fftSize = 128;
-        analyser.smoothingTimeConstant = 0.8;
+        analyser.fftSize = 64;
         source.connect(analyser);
 
         const data = new Uint8Array(analyser.frequencyBinCount);
@@ -1241,7 +1219,7 @@
           });
         }
         draw();
-      } catch (e) { console.warn('Visualizer unavailable', e); }
+      } catch (e) { console.warn('Visualizer unavailable'); }
     }
 
     // ═══════════════════════════════════════════════
@@ -1266,6 +1244,7 @@
       setTimeout(() => t.classList.remove('show'), 3500);
     }
 
+    // load voices async (some browsers need this)
     window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
 </script>
 </body>
