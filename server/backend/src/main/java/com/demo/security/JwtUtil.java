@@ -5,6 +5,8 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import com.demo.service.TokenBlacklistService;
+import lombok.RequiredArgsConstructor;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
@@ -12,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
+@RequiredArgsConstructor
 public class JwtUtil {
 
     @Value("${jwt.secret}")
@@ -19,6 +22,8 @@ public class JwtUtil {
 
     @Value("${jwt.expiration}")
     private long expiration; // 3600000ms = 1 hour
+
+    private final TokenBlacklistService tokenBlacklistService; // ← NEW
 
     // generate signing key from secret string
     private SecretKey getSigningKey() {
@@ -47,8 +52,13 @@ public class JwtUtil {
         return extractAllClaims(token).getSubject();
     }
 
-    // check if token is valid and not expired
+    // check if token is valid and not expired (NOW INCLUDES BLACKLIST CHECK)
     public boolean isTokenValid(String token, UserDetails userDetails) {
+        // ← NEW: Check if token is blacklisted (logged out)
+        if (tokenBlacklistService.isBlacklisted(token)) {
+            return false;
+        }
+
         final String email = extractEmail(token);
         return email.equals(userDetails.getUsername()) && !isTokenExpired(token);
     }

@@ -24,6 +24,7 @@ public class AuthService {
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
     private final UserDetailsService userDetailsService;
+    private final TokenBlacklistService tokenBlacklistService;  // ← NEW
 
     public AuthResponseDTO register(RegisterRequestDTO request) {
 
@@ -77,5 +78,17 @@ public class AuthService {
                 .email(user.getEmail())
                 .role(user.getRole().name())
                 .build();
+    }
+
+    /**
+     * NEW: Logout method
+     * Adds token to blacklist so it can't be used anymore
+     */
+    public void logout(String token) {
+        if (token != null && !token.isEmpty()) {
+            // Remove "Bearer " prefix if present
+            String cleanToken = token.startsWith("Bearer ") ? token.substring(7) : token;
+            tokenBlacklistService.blacklistToken(cleanToken);
+        }
     }
 }
