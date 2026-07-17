@@ -1,5 +1,6 @@
-package com.demo.model;
+package com.demo.auth.model;
 
+import com.demo.interview.model.InterviewSetup;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
