@@ -1,9 +1,9 @@
-package com.demo.controller;
+package com.demo.auth.controller;
 
-import com.demo.dto.AuthResponseDTO;
-import com.demo.dto.LoginRequestDTO;
-import com.demo.dto.RegisterRequestDTO;
-import com.demo.service.AuthService;
+import com.demo.auth.dto.response.AuthResponseDTO;
+import com.demo.auth.dto.request.LoginRequestDTO;
+import com.demo.auth.dto.request.RegisterRequestDTO;
+import com.demo.auth.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,7 +18,6 @@ import com.demo.security.JwtUtil;
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*") // allow frontend to call — restrict this in production
 public class AuthController {
-
     private final AuthService authService;
     private final JwtUtil jwtUtil;                      // ← NEW
     private final UserDetailsService userDetailsService; // ← NEW
