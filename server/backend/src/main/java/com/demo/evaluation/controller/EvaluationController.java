@@ -1,9 +1,16 @@
-package com.demo.controller;
+package com.demo.evaluation.controller;
 
-import com.demo.dto.EvaluationReportResponseDTO;
-import com.demo.model.*;
-import com.demo.repository.*;
-import com.demo.service.EvaluationService;
+import com.demo.auth.model.User;
+import com.demo.auth.repository.UserRepository;
+import com.demo.evaluation.dto.EvaluationReportResponseDTO;
+import com.demo.evaluation.model.AnalysisResult;
+import com.demo.evaluation.model.EvaluationReport;
+import com.demo.evaluation.repository.AnalysisResultRepository;
+import com.demo.interview.model.InterviewQuestionHistory;
+import com.demo.interview.model.InterviewSession;
+import com.demo.interview.model.InterviewSetup;
+import com.demo.interview.repository.InterviewQuestionHistoryRepository;
+import com.demo.evaluation.service.EvaluationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -73,7 +80,6 @@ public class EvaluationController {
                     return EvaluationReportResponseDTO.QuestionBreakdownDTO.builder()
                             .questionNumber(q.getQuestionNumber())
                             .questionText(q.getQuestionText())
-                            .userAnswer(q.getUserAnswer())
                             .wasSkipped(q.isWasSkipped())
                             .isFollowUp(q.isFollowUp())
                             .relevanceScore(analysis != null ? analysis.getRelevanceScore() : 0)

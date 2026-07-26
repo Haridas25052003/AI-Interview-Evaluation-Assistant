@@ -1,5 +1,6 @@
-package com.demo.model;
+package com.demo.evaluation.model;
 
+import com.demo.interview.model.InterviewSession;
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.*;

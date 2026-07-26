@@ -1,5 +1,6 @@
-package com.demo.model;
+package com.demo.evaluation.model;
 
+import com.demo.interview.model.InterviewQuestionHistory;
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.validation.constraints.Max;

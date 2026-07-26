@@ -1,8 +1,11 @@
-package com.demo.controller;
+package com.demo.evaluation.controller;
 
-import com.demo.dto.EvaluationReportResponseDTO;
-import com.demo.service.EvaluationService;
-import com.demo.service.PdfExportService;
+import com.demo.evaluation.dto.EvaluationReportResponseDTO;
+import com.demo.evaluation.repository.AnalysisResultRepository;
+import com.demo.interview.repository.InterviewQuestionHistoryRepository;
+import com.demo.interview.repository.InterviewSessionRepository;
+import com.demo.evaluation.service.EvaluationService;
+import com.demo.evaluation.service.PdfExportService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -17,9 +20,9 @@ public class PdfExportController {
 
     private final PdfExportService pdfExportService;
     private final EvaluationService evaluationService;
-    private final com.demo.repository.InterviewSessionRepository sessionRepository;
-    private final com.demo.repository.InterviewQuestionHistoryRepository questionHistoryRepository;
-    private final com.demo.repository.AnalysisResultRepository analysisResultRepository;
+    private final InterviewSessionRepository sessionRepository;
+    private final InterviewQuestionHistoryRepository questionHistoryRepository;
+    private final AnalysisResultRepository analysisResultRepository;
 
     // GET /api/evaluation/download/{sessionToken}
     // frontend calls this when user clicks "Download Report" button
