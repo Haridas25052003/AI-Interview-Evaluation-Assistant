@@ -1,9 +1,9 @@
-package com.demo.repository;
+package com.demo.interview.repository;
 
-import com.demo.model.InterviewType;
+import com.demo.interview.model.InterviewType;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.demo.model.InterviewSetup;
+import com.demo.interview.model.InterviewSetup;
 
 import java.util.List;
 

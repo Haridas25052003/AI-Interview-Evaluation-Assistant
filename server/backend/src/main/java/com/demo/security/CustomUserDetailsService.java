@@ -1,7 +1,7 @@
 package com.demo.security;
 
-import com.demo.model.User;
-import com.demo.repository.UserRepository;
+import com.demo.auth.model.User;
+import com.demo.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
