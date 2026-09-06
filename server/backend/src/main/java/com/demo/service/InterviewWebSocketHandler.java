@@ -1,12 +1,20 @@
 package com.demo.service;
 
-import com.demo.dto.*;
-import com.demo.model.*;
-import com.demo.repository.InterviewQuestionHistoryRepository;
-import com.demo.repository.ProctorLogRepository;
-import com.demo.service.InterviewSessionService;
-import com.demo.service.QuestionGeneratorService;
-import com.demo.service.AnalysisService;
+import com.demo.evaluation.model.AnalysisResult;
+import com.demo.evaluation.service.AnalysisService;
+import com.demo.interview.dto.AnswerPayload;
+import com.demo.interview.dto.QuestionPayload;
+import com.demo.interview.model.InterviewQuestionHistory;
+import com.demo.interview.model.InterviewSession;
+import com.demo.interview.model.InterviewSetup;
+import com.demo.interview.model.SessionStatus;
+import com.demo.interview.service.InterviewSessionService;
+import com.demo.interview.service.QuestionGeneratorService;
+import com.demo.interview.repository.InterviewQuestionHistoryRepository;
+import com.demo.proctor.dto.ProctorEventPayload;
+import com.demo.dto.WebSocketMessage;
+import com.demo.proctor.model.ProctorLog;
+import com.demo.proctor.repository.ProctorLogRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

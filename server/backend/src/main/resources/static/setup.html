@@ -65,6 +65,7 @@
           transition: all .2s;
         }
         .logout-btn:hover { border-color: var(--error); color: var(--error); }
+        .logout-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
         /* ── MAIN ── */
         main {
@@ -411,7 +412,7 @@
     <div class="nav-brand">AI Interviewer</div>
     <div class="nav-user">
         Hello, <span id="user-name">—</span>
-        <button class="logout-btn" onclick="logout()">Logout</button>
+        <button class="logout-btn" id="logout-btn" onclick="logout()">Logout</button>
     </div>
 </nav>
 
@@ -512,8 +513,11 @@
     const API   = 'http://localhost:8080/api';
     const token = localStorage.getItem('token');
 
-    // auth guard
-    if (!token) window.location.href = 'auth.html';
+    // auth guard — if no token, redirect to login
+    if (!token) {
+      window.location.href = 'auth.html';
+    }
+
     document.getElementById('user-name').textContent = localStorage.getItem('userName') || '—';
 
     let selectedType = null;
@@ -648,17 +652,49 @@
       }
     }
 
+    // ── LOGOUT ──
+    async function logout() {
+      const btn = document.getElementById('logout-btn');
+      btn.disabled = true;
+
+      try {
+        // Call logout endpoint to blacklist token on server
+        const res = await fetch(`${API}/auth/logout`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        // Whether the backend call succeeds or fails, clear client-side storage
+        localStorage.clear();
+        showToast('Logged out successfully');
+
+        // Redirect to login after a short delay
+        setTimeout(() => {
+          window.location.href = 'auth.html';
+        }, 800);
+
+      } catch (e) {
+        console.error('Logout error:', e);
+        // Even if backend call fails, clear client-side storage
+        localStorage.clear();
+        showToast('Logged out (offline)', 'success');
+        setTimeout(() => {
+          window.location.href = 'auth.html';
+        }, 800);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
     // ── HELPERS ──
     function showToast(msg, type = 'success') {
       const t = document.getElementById('toast');
       t.textContent = msg;
       t.className = `toast ${type} show`;
       setTimeout(() => t.classList.remove('show'), 3500);
-    }
-
-    function logout() {
-      localStorage.clear();
-      window.location.href = 'auth.html';
     }
 </script>
 </body>

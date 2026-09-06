@@ -5,7 +5,7 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-import com.demo.service.TokenBlacklistService;
+import com.demo.auth.service.TokenBlacklistService;
 import lombok.RequiredArgsConstructor;
 
 import javax.crypto.SecretKey;
